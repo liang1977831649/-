@@ -1,0 +1,212 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define typename char
+#define MAX 20
+//节点结构
+struct Tree {
+	typename date;
+	int parent;
+};
+//树结构
+struct Arrtree {
+	Tree arr[MAX];//数组大小
+	int n;//节点个数
+};
+
+void arryInit(Arrtree* arry) {
+	for (int i = 0; i < MAX; i++) {
+		arry->arr[i].date = ' ';
+		arry->arr[i].parent = -2;
+	}
+	arry->n = 0;
+}
+void treeCreat(Arrtree* arry) {
+	int number;//总个数
+	char str;
+	int father;
+	printf("请输入要创建的节点个数：");
+	scanf_s("%d", &number);
+	//查看是否爆满；
+	if (MAX < number) {
+		printf("数量过大，不可创建\n");
+		return;
+	}
+	arry->n = number;
+	
+	printf("请输入字符以及父类数组下标：\n");
+	for (int i = 0; i < number; i++) {
+		getchar();
+		scanf("%c %d", &str, &father);
+		arry->arr[i].date = str;
+		arry->arr[i].parent = father;
+	}
+	printf("已创建树！\n");
+}
+void Printtree(Arrtree* arry) {
+	for (int i = 0; (i < arry->n); i++) {
+		if (arry->arr[i].parent != -2) {
+			printf("%c ", arry->arr[i].date);
+		}
+	}
+	printf("\n");
+}
+void Findfather(Arrtree* arry) {
+	char ch;
+	int flag=0;
+	getchar();
+	printf("请输入你要找子类的字符：\n");
+	ch = getchar();
+	for (int i = 0; i < arry->n; i++) {
+		if (ch == arry->arr[i].date) {
+			if (arry->arr[i].parent == -1) {
+				printf("该子类没有父亲\n");
+				return;
+			}
+			flag = 1;
+			//已找到
+			char fatch = arry->arr[arry->arr[i].parent].date;
+			printf("%c的父类是%c\n",ch, fatch);
+		}
+	}
+	if (flag == 0) {
+		printf("未找到该元素！\n");
+	}
+}
+//采用递归删除树节点
+void Delrecrusion(Arrtree* arry, int i) {
+	for (int j = 0; j < arry->n; j++) {
+		if (arry->arr[j].parent == i) {
+			Delrecrusion(arry, j);
+
+			printf("已删除%c\n", arry->arr[j].date);
+			arry->arr[j].date = ' ';
+			arry->arr[j].parent = -2;
+			
+		}
+	}
+}
+void Deltree(Arrtree* arry) {
+	char ch;
+	printf("请输入你要删除的节点数据：");
+	getchar();
+	scanf_s("%c", &ch);
+	for (int i = 0; i < arry->n; i++) {
+		if (ch == arry->arr[i].date) {
+			Delrecrusion(arry, i);
+			
+			printf("已删除%c \n", arry->arr[i].date);
+			arry->arr[i].date = ' ';
+			arry->arr[i].parent = -2;
+			
+			printf("删除成功！\n");
+			return;
+		}
+	}
+}
+void Addtree(Arrtree* arry) {
+	
+	char ch;
+	int father;
+	printf("请输入你要添加的字符以及它的父类数组下标：\n");
+	getchar();
+	scanf("%c %d", &ch,&father);
+	for (int i = 0; i < MAX; i++) {
+		if (arry->arr[i].parent == -2) {
+			arry->arr[i].date = ch;
+			arry->arr[i].parent = father;
+			(arry->n)++;
+			
+			printf("添加成功！\n");
+			return;
+		}
+	}
+}
+void Findchildrecursion(Arrtree* arry, int index) {
+	for (int i = 0; i < arry->n; i++) {
+		if (arry->arr[i].parent == index) {
+			Findchildrecursion(arry, i);
+			printf("该节点子类是：%c\n", arry->arr[i].date);
+		}
+	}
+}
+void Findchild(Arrtree* arry) {
+	char ch;
+	int flag = 0,index;
+	getchar();
+	printf("您要寻找的孩子的父类是：\n");
+	scanf("%c", &ch);
+	for (int i = 0; i < arry->n; i++) {
+		if (ch == arry->arr[i].date) {
+			index = i;
+			flag = 1;
+		}
+	}
+	if (flag == 1) {
+		Findchildrecursion(arry, index);
+	}
+	else {
+		printf("该节点没有子类!\n");
+	}
+}
+void menu(){
+	printf("-----------------0.显示菜单-------------------\n");
+	printf("-----------------1.创建一棵树-----------------\n");
+	printf("-----------------2.删除树的某节点-------------\n");
+	printf("-----------------3.寻找某个节点的父节点-------\n");
+	printf("-----------------4.添加某节点-----------------\n");
+	printf("-----------------5.寻找某节点的子节点---------\n");
+	printf("-----------------6.打印节点-------------------\n");
+	printf("-----------------7.退出程序-------------------\n");
+}
+int main() {
+	Arrtree arry;
+	Arrtree *pa = &arry;
+	
+	//初始化所有节点
+	arryInit(pa);
+	
+	int input;
+	menu();
+	while (true) {
+		printf("请选择：");
+		scanf("%d", &input);
+		switch (input)
+		{
+		case 0:
+			menu();
+			break;
+		case 1:
+			treeCreat(pa);
+			break;
+		case 2:
+			Deltree(pa);
+			break;
+		case 3:
+			Findfather(pa);
+			break;
+		case 4:
+			Addtree(pa);
+			break;
+		case 5:
+			Findchild(pa);
+			break;
+		case 6:
+			Printtree(pa);
+			break;
+		case 7:
+			printf("程序已推出！\n");
+			exit(-1);
+		}
+	}
+}
+/*
+R -1
+A 0
+B 0
+C 0
+D 1
+E 1
+F 3
+G 6
+H 6
+K 6   */

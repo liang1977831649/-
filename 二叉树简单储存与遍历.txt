@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+struct treedate {
+	char node;
+	struct treedate* LChild;
+	struct treedate* RChild;
+};
+//1.先创建所有节点
+struct treedate* creatdate(char node) {
+	//动态空间申请
+	struct treedate* head = (struct treedate*)malloc(sizeof(struct treedate));
+	//指针置空
+	head->node = node;
+	head->LChild = NULL;
+	head->RChild = NULL;
+	return head;
+}
+//2.连接节点
+void connectdate(treedate* head, treedate* LCild, treedate* RCild) {
+	head->LChild = LCild;
+	head->RChild = RCild;
+}
+//3.后序打印
+void printdate(treedate* head) {
+	if (head != NULL) {
+		
+		printdate(head->LChild);
+		printdate(head->RChild);
+		printf("%c ", head->node);
+	}
+}
+//先序打印
+void printdate(treedate* head) {
+	if (head != NULL) {
+		printf("%c ", head->node);
+		printdate(head->LChild);
+		printdate(head->RChild);
+	}
+}
+//中序打印
+void printdate(treedate* head) {
+	if (head != NULL) {
+		printdate(head->LChild);
+		printf("%c ", head->node);
+		printdate(head->RChild);
+	}
+}
+int main() {
+	struct treedate* A = creatdate( 'A');
+	struct treedate* B = creatdate( 'B');
+	struct treedate* C = creatdate( 'C');
+	struct treedate* D = creatdate( 'D');
+	struct treedate* E = creatdate( 'E');
+	struct treedate* F = creatdate( 'F');
+	struct treedate* G = creatdate( 'G');
+	struct treedate* K = creatdate( 'K');
+
+	connectdate(A, B, C);
+	connectdate(B, D, E);
+	connectdate(C, F, G);
+	connectdate(F, NULL, K);
+
+	printdate(A);
+}

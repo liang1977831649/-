@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef char TypeNode;
+//先定义二叉树和栈
+//定义二叉树
+struct Node {//定义二叉树
+	struct Node* Lchild;
+	struct Node* Rchild;
+	TypeNode str;
+};
+//创建树并实行连接操作
+struct Node* treecreat(char *arr, int *pos) {
+	if (arr[*pos] != '#') {
+		//创建一个节点
+		struct Node* root = (struct Node*)malloc(sizeof(struct Node));
+		root->str = arr[*pos];
+		(*pos)++;
+		root->Lchild = treecreat(arr, pos);
+		(*pos)++;
+		root->Rchild = treecreat(arr, pos);
+		return root;
+	}
+	else {
+		return NULL;
+	}
+}
+int main() {
+	char arry[50];
+	gets_s(arry);
+	int pos = 0;
+	Node* root = treecreat(arry,&pos);
+}

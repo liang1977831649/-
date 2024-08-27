@@ -1,0 +1,191 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+struct Note {
+	char arrs[20];
+	int numbers;
+	struct Note *next;
+};
+void copy(struct Note *newdate, char *arr, int*number) {
+	int i = 0;
+	for (i; arr[i] != '\0'; i++) {
+		newdate->arrs[i] = arr[i];
+	}newdate->arrs[i] = '\0';
+	newdate->numbers = *number;
+}
+struct Note* creat_Note(struct Note *head) {
+	char arr[20];
+	int number;
+	struct Note *pb;
+	
+	while (true) {
+		gets_s(arr);
+		scanf("%d", &number);
+		if (number ==0) {
+			break;
+		}
+		struct Note *pa;
+		pa = (struct Note*)malloc(sizeof(struct Note));
+
+		//该表指针
+		copy(pa, arr, &number);
+
+		getchar();
+
+		//连接节点操作
+		if (head == NULL) {
+			head = pa;
+		}
+		else {
+			pb->next = pa;
+		}
+		pb = pa;
+	}
+	pb->next = NULL;
+	return head;
+}
+struct Note* insert_Note(struct Note *head) {
+	int n, m;
+	char str[20];
+	printf("输入你要添加的姓名和学号以及在某个学好的前面\n");
+	getchar();
+	gets_s(str);
+	scanf("%d %d", &n, &m);
+
+	struct Note *pre, *pc;
+	pre = head;
+	pc = pre->next;
+
+	while (pc != NULL) {
+		if (m == pc->numbers || m == pre->numbers) {
+			break;
+		}
+		pre = pc;
+		pc = pc->next;
+	}
+	if (pc != NULL) {//找到指定的的数据
+		struct Note *newdate;
+		newdate = (struct Note*)malloc(sizeof(struct Note));
+		if (m == pre->numbers) {
+			head = newdate;
+			copy(newdate, str, &n);
+		}
+		else {
+			copy(newdate, str, &n);
+		}
+
+		//改变指针指向,不能用pc=newdate，因为此时pc是独立于链表外的，而且newdate也是独立于链表外
+		//此时pc=NULL
+		pre->next = newdate;
+		newdate->next = pc;
+
+	}
+	else {//找不到指定的数据，在后尾巴插入
+		struct Note *newdate;
+		newdate = (struct Note*)malloc(sizeof(struct Note));
+
+		copy(newdate, str, &n);
+
+		pre->next = newdate;
+		newdate->next = NULL;
+
+		printf("已插入\n");
+	}
+	return head;
+}
+void print(struct Note *head) {
+	while (head != NULL) {
+		puts(head->arrs);
+		printf(" %d", head->numbers);
+		head = head->next;
+		printf("\n");
+	}
+}
+struct Note* del_Note(struct Note* head) {
+	printf("输入你要输出的学号：\n");
+	int number;
+	scanf("%d", &number);
+	
+	//辅助指针
+	struct Note *pc, *pre;
+	pc = head->next;
+	pre = head;
+
+
+	//寻找数据
+	while (pc != NULL) {
+		if (pc->numbers == number) {
+			break;
+		}
+		if (pre->numbers == number) {//要删除第一个数据的话
+			free(pre);
+			return pc;//删除了head，故head不能再用，得返回pc
+		}
+		pre = pc;
+		pc = pc->next;
+	}
+	//执行删除操作
+	if (pc != NULL) {
+		if (pc->next != NULL) {
+			pre->next = pc->next;
+			free(pc);
+		}
+		else {
+			pre->next = NULL;
+			free(pc);
+		}
+		printf("已删除\n");
+	}
+	else {
+		printf("无法找到你要删除的数据\n");
+	}
+	return head;
+}
+struct Note* clean_Note(struct Note *head) {
+	//辅助指针
+	struct Note *pitem, *pc;
+	pc = head->next;
+	pitem = pc->next;
+
+	//清空
+	while (pc != NULL) {
+		free(pc);
+		pc = pitem;
+		if (pitem == NULL) {
+			free(pc);
+			break;
+		}pitem = pitem->next;
+	}
+	head->next = NULL;
+	head->arrs[0] = '\0';
+	return head;
+}
+void destory_Note(struct Note *head) {
+	//从后往前销毁
+	struct Note *pc = head;
+	while (pc != NULL) {
+		struct Note *plater = pc->next;
+		free(pc);
+		pc = NULL;
+		pc = plater;
+	}
+	printf("已销毁！");
+}
+int main() {
+	struct Note *head = NULL;
+	printf("创建节点列表操作\n");
+	head=creat_Note(head);
+	printf("打印链表操作\n");
+	print(head);
+	printf("插入节点操作\n");
+	head=insert_Note(head);
+	print(head);
+	printf("删除节点操作\n");
+	head=del_Note(head);
+	print(head);
+	printf("清空链表操作\n");
+	head=clean_Note(head);
+	printf("销毁链表操作\n");
+	destory_Note(head);
+	return 0;
+}

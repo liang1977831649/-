@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include <string.h>
+
+struct stack {
+	char* p;
+	int size;
+	int capacity;
+};
+struct stack ST;
+void Init(stack* s){
+	s->p = NULL;
+	s->capacity = s->size = 0;
+}
+void newcapacity(stack* s) {
+	if (s->capacity == 0) {
+		s->capacity += 4;
+		s->p = (char*)malloc(4 * sizeof(char));
+	}
+	else {
+		s->capacity *= 2;
+		int* item = (int*)realloc(s->p, (s->capacity) * sizeof(char));
+	}
+}
+void Push(stack* s, char item) {
+	s->p[s->size++] = item;
+}
+void Del(stack* s, char item,int* flag,int*makk) {
+	//相同出栈
+	if(item==']'&&s->p[s->size-1]=='['){//
+		s->p[--s->size] = '\0';
+		*flag= 1;
+		*makk = 1;
+	}
+	else if (item == ')' && s->p[s->size - 1]=='(') {
+		s->p[--s->size] = '\0';
+		*flag = 1;
+		*makk = 1;
+	}
+	else if(item == '}'&&s->p[s->size - 1] == '{'){
+		s->p[--s->size] = '\0';
+		*flag =1;
+		*makk = 1;
+	}
+	else {
+		s->p[s->size++] = item;
+		*flag = 0;
+	}
+}
+int Judge(stack* s, char item) {
+	if (item == ']'&&s->p[s->size - 1] == '[') {//
+		s->p[--s->size] = '\0';//将相对应的字符串置为'\0'
+		return 1;
+	}
+	else if (item == ')' && s->p[s->size - 1] == '(') {
+		s->p[--s->size] = '\0';
+		return 1;
+	}
+	else if (item == '}'&&s->p[s->size - 1] == '{') {
+		s->p[--s->size] = '\0';
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+int main() {
+	char item;
+	char arr[20];
+	int flag = 0;//作用是用来进入另一个后面一个与item是否相等的函数
+	int makk = 0;//作用是看最后能不能进入到后面的判断
+	Init(&ST);
+	gets_s(arr);
+	int len = strlen(arr);
+	for (int i = 0; i < len; i++) {
+		item = arr[i];
+		if (item == '(' || item == '[' || item == '{'||item == ')' || item == ']' || item == '}') {
+			//能否扩容
+			if (ST.capacity == ST.size) {
+				newcapacity(&ST);
+			}
+			//入栈操作
+			if (i == 0) {//第一个就直接放进去
+				Push(&ST, item);
+			}
+			else {//其他的该判断与前一个是否相等了,不相等就加入，相等就出栈
+			
+				if (flag == 1&&ST.size!=0) {//sizeof!=0是为了item要与ST.p[]中的最后一个字符串做对比
+					//开始判断
+					if (Judge(&ST, item)) {
+						makk = 1;
+						continue;
+					}
+					else {
+						makk = 0;//一旦遇到与ST.p[]最后一个不相等的，直接退出循环
+						break;
+					}
+				}
+				else {
+					Del(&ST, item,&flag,&makk);//已经包含了有关判断item与ST最后一个符号是否相等
+					//flag的的作用是能为了进入Judge函数
+					//makk的作用是解决''(){}[]''这类的的问题
+				}
+			}
+		}
+	}
+	if (makk == 0) {
+		printf("NO\n");
+	}else{
+		printf("YES\n");
+	}
+	return 0;
+}

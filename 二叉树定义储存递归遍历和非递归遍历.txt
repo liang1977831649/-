@@ -1,0 +1,136 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef char TypeNode;
+//先定义二叉树和栈
+//定义二叉树
+struct Node {//定义二叉树
+	struct Node* Lchild;
+	struct Node* Rchild;
+	TypeNode str;
+};
+//定义一个栈
+struct Nodestack {
+	struct Node *arr;
+	int capacity;
+	int size;
+}stack;
+//栈的相关操作
+//栈的初始化
+void stackInit(Nodestack* st) {
+	st->arr = (struct Node*)malloc(sizeof(TypeNode) * 8);
+	st->capacity = 8;
+	st->size = 0;
+	printf("栈创建成功！\n");
+}
+//入栈
+void stackPush(Nodestack* st, Node value) {
+	//判断空间是否满
+	if (st->capacity == st->size) {
+		//扩容
+		st->arr = (struct Node*)realloc(st->arr, st->capacity * 2 * sizeof(TypeNode));
+		st->capacity *= 2;
+	}
+	st->arr[st->size++] = value;
+}
+//出栈
+void stackDel(Nodestack* st) {
+	//判断栈是否为空
+	if (st->size == 0) {
+		printf("栈为空，不能出栈！");
+	}
+	st->size--;
+}
+//获取栈顶元素
+struct Node*  stackTop(Nodestack* st) {
+	return &(st->arr[st->size - 1]);
+}
+//创建树并实行连接操作
+struct Node* treecreat(char *arr, int *pos) {
+	if (arr[*pos] != '#') {
+		//创建一个节点
+		struct Node* root = (struct Node*)malloc(sizeof(struct Node));
+		root->str = arr[*pos];
+		(*pos)++;
+		root->Lchild = treecreat(arr, pos);
+		(*pos)++;
+		root->Rchild = treecreat(arr, pos);
+		return root;
+	}
+	else {
+		return NULL;
+	}
+}
+//递归打印
+void recursionOrder(struct Node* root) {
+	struct Node* cur = root;
+	while (cur != NULL) {
+		printf("%c ", cur->str);
+		recursionOrder(cur->Lchild);
+		recursionOrder(cur->Rchild);
+	}
+	
+}
+//先序遍历
+void preOrder(struct Node* root,Nodestack* st) {
+	//定义两个辅助指针
+	struct Node* cur;
+	struct Node* top;
+
+	cur = root;
+	printf("先序遍历：");
+
+	while (cur != NULL || st->size != 0) {
+		while (cur != NULL) {
+			printf("%c ", cur->str);//打印操作
+			stackPush(st, *cur);//入栈，对cur指针进行解引用
+			cur = cur->Lchild;//指针向左走
+		}
+		//此时的cur已指向NULL
+		top = stackTop(st);
+		cur = top->Rchild;//指向右指针
+		stackDel(st);//删除栈顶元素
+	}
+}
+//中序遍历
+void middleOrder(struct Node* root, struct Nodestack* st) {
+	struct Node* top;
+	struct Node* cur = root;
+
+	printf("中序打印：");
+
+	while (cur != NULL || st->size != 0) {
+		while (cur != NULL) {
+			//先将节点都入栈
+			stackPush(st, *cur);
+			cur = cur->Lchild;
+			//左节点一直走到底
+		}
+		//取出顶部节点,每个节点都有机会成为top
+		top = stackTop(st);
+		
+		//每一次取出栈顶结点都要出栈一次
+		stackDel(st);
+
+		//打印节点
+		printf("%c ", top->str);
+		
+		//某个节点的的左边走完后，走右边
+		cur = top->Rchild;
+	}
+}
+int main() {
+	//创建一个栈
+	stackInit(&stack);
+	char arry[50];
+	gets_s(arry);
+	int pos = 0;
+	Node* root = treecreat(arry,&pos);
+	
+	printf("递归遍历：");
+	recursionOrder(root);//递归遍历
+	printf("\n");
+	preOrder(root, &stack);//前序遍历
+	printf("\n");
+	middleOrder(root, &stack);//中序遍历
+}

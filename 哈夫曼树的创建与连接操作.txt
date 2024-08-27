@@ -1,0 +1,101 @@
+#include<stdio.h>
+#include<stdlib.h>
+//哈夫曼树的创建
+struct Node {
+	int date;
+	int parent;
+	int Lchild, Rchild;
+};
+struct ArrNode {
+	struct Node* arry;
+	int number;
+};
+void Init_Node(struct ArrNode* List) {//给节点初始化
+	int n = (List->number) * 2 - 1;
+	for (int i = 1; i <= n; i++) {
+		if (i <= List->number) {
+			printf("请输入结点的值：");
+			scanf_s("%d", &(List->arry[i].date));
+			List->arry[i].Lchild = List->arry[i].Rchild = List->arry[i].parent = 0;
+		}
+		else {
+			List->arry[i].Lchild = List->arry[i].Rchild = List->arry[i].parent = List->arry[i].date = 0;
+		}
+	}
+	printf("节点初始化成功！\n");
+}
+void Creat_Node(struct ArrNode* List) {//创造空间
+	int n;
+	printf("请输入你要创建哈夫曼树结点的个数：");
+	scanf_s("%d", &n);
+	List->arry = (struct Node*)malloc((2*n) * sizeof(struct Node));//创建空间
+	List->number = n;
+	Init_Node(List);//节点的初始化
+}
+void Select_Node(struct ArrNode* List,int* index1,int* index2) {//寻找两个最小值
+	//先拿出一个较小值
+	int min,item;
+	for (int i = 1; i <= List->number; i++) {//先拿第一个数作为参考
+		if (List->arry[i].parent == 0) {
+			min = List->arry[i].date;
+			*index1 = item = i;
+			break;
+		}
+	}
+	//第一个较小值开始比较
+	for (int i = item+1; i <= List->number; i++) {
+		if (List->arry[i].date < min&&List->arry[i].parent == 0) {
+			min = List->arry[i].date;
+			*index1= i;
+		}
+	}
+	//再拿出第二个较小值出来比
+	for (int j = 1; j <= List->number; j++) {
+		if (j != *index1 && List->arry[j].parent == 0) {
+			min = List->arry[j].date;
+			*index2=item = j;
+			break;
+		}
+	}
+	//第二个较小者开始进行比较
+	for (int j = item+1; j <= List->number; j++) {
+		if (min > List->arry[j].date&&List->arry[j].parent == 0&&j!=*index1) {
+			min = List->arry[j].date;
+			*index2 = j;
+		}
+	}
+}
+void CreatNew_Node(struct ArrNode* List, int* index1, int* index2) {
+	//创建一个新结点 并赋值
+	List->arry[++(List->number)].date = List->arry[*index1].date + List->arry[*index2].date;
+	List->arry[List->number].Lchild = *index1;
+	List->arry[List->number].Rchild = *index2;
+	
+	//该表最小两者的父节点者的
+	List->arry[*index1].parent = List->number;
+	List->arry[*index2].parent = List->number;
+}
+void Connect_Node(struct ArrNode* List) {
+	int index1, index2;
+	int item = (List->number) * 2 ;
+	for (int i = 1; i < item; i++) {
+		if (List->arry[i].date == 0) {
+			Select_Node(List, &index1, &index2);//找两个较小者
+			CreatNew_Node(List, &index1, &index2);//创建新结点，并使他们连接起来
+		}
+	}
+	printf("节点连接成功！\n");
+}
+void Print_Node(struct ArrNode* List) {
+	for (int i = 1; i <= List->number; i++) {
+		printf("%d ", List->arry[i].date);
+	}
+	printf("\n");
+}
+int main() {
+	struct ArrNode List;
+	Creat_Node(&List);//创建哈夫曼树的数组
+	Connect_Node(&List);//连接操作
+	Print_Node(&List);//打印操作
+	return 0;
+}

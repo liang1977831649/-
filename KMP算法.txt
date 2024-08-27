@@ -1,0 +1,90 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+void Getnext(char* arr, int* next) {
+	int j = 0, k = -1;
+	next[0] = -1;
+	int len = strlen(arr);
+	while (j < len - 1) {
+		if (k == -1 || arr[k] == arr[j]) {
+			j++;
+			k++;
+			next[j] = k;
+		}
+		else {
+			k = next[k];
+		}
+	}
+}
+int Index(char *Farr,char *arr,int *next) {
+	int j = 0,i=0;
+	int len = strlen(arr);
+	int lens = strlen(Farr);
+	while (i < len) {
+		if (arr[i] == Farr[j]) {
+			i++; 
+			j++;
+		}
+		else if (arr[i] != Farr[j]) {
+			j++;
+			if (i != 0) {
+				i = next[i];
+			}
+		}
+		if (i == len) {
+			return j - len;
+		}
+		else if (lens - j  < len - i ) {
+			return -1;
+		}
+	}
+}
+int my_kmp(char* s1, char* key,int* next) {
+	int i = 0;
+	int j = 0;
+	int l1 = strlen(s1);
+	int l2 = strlen(key);
+	while ((i < l1) && (j < l2)) {
+		if (j == -1 || s1[i] == key[j]) {
+			i++;
+			j++;
+		}
+		else {
+			//i=i-j+1;j=0;
+			j = next[j];
+		}
+	}
+	if (j >= l2)return i - l2;
+	else return 0;
+}
+
+int main() {
+	char arr[50],Farr[100];
+	printf("输入主串：");
+	gets_s(Farr);
+	printf("输入模式串：");
+	gets_s(arr);
+	int* next = (int *)malloc(sizeof(int)*strlen(arr));
+	Getnext(arr, next);
+	for (int i = 0; i < strlen(arr); i++) {
+		printf("%d ",next[i]);
+	}
+	printf("\n");
+	int index = Index(Farr, arr, next);
+	printf("d=%d\n", index);
+	
+	index = my_kmp(Farr, arr, next);
+	printf("d=%d\n", index);
+	free(next);
+	return 0;
+}
+/*abcabcabdabba
+abcabd
+成功例子*/
+
+/*abababababaaababaaa
+abbabaababaa
+失败例子*/
+
+/*abcabcabdabba
+mbcabd*/

@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <uthash.h>
+#include<string.h>
+struct My_struct {
+	int id;
+	char name[25];
+	UT_hash_handle hh;
+};
+void Hash_insert(struct My_struct** users, int id_add, char* name_add) {
+	struct My_struct* s;
+	HASH_FIND_INT(*users, &id_add, s);
+	if (s == NULL) {//如果找不到的话
+		s = (My_struct*)malloc(sizeof(My_struct));
+		s->id = id_add;
+		strcpy(s->name, name_add);
+		HASH_ADD_INT(*users, id, s);
+	}
+}//插入元素
+void Hash_delete(struct My_struct** users, My_struct* user) {
+	HASH_DEL(*users, user);
+	free(user);
+}//删除哈希数据
+void Hash_delete_all(struct My_struct** users) {
+	struct My_struct* pc, *item;
+	HASH_ITER(hh,*users, pc, item) {//引入头，pc
+		HASH_DEL(*users, pc);
+		free(pc);
+	}
+}//删除全部元素
+void Hash_display(struct My_struct** users) {
+	struct My_struct *s;
+	for (s = *users; s != NULL; s =(struct My_struct*) s->hh.next) {
+		printf("id=%d,name=%s\n", s->id, s->name);
+	}
+	printf("\n");
+}//打印出哈希值
+struct My_struct* Hash_find_user(struct My_struct** users, int user_id) {
+	struct My_struct* s;
+	HASH_FIND_INT(*users, &user_id, s);
+	return s;
+}//查找某个数据
+int Hash_count(struct My_struct** users) {
+	return HASH_COUNT(*users);
+}//统计数据的个数
+int main() {
+	struct My_struct* users = NULL;
+	My_struct* s;
+	char user_name[20];
+
+	//增加数据
+	int number;
+	printf("please input the number:");
+	scanf_s("%d", &number);
+	getchar();
+	for (int i = 0; i < number; i++) {
+		gets_s(user_name);
+		Hash_insert(&users, i, user_name);
+	}
+
+	//打印数据
+	Hash_display(&users);
+
+	//删除数据
+	s = Hash_find_user(&users, 1);
+	Hash_delete(&users,s);
+	s = Hash_find_user(&users, 4);
+	Hash_delete(&users, s);
+
+	//打印数据
+	Hash_display(&users);
+
+	//查找数据
+	s = Hash_find_user(&users, 2);
+	printf("date:id=%d,name=%s\n", s->id, s->name);
+
+	//个数统计
+	int count = Hash_count(&users);
+	printf("%d\n", count);
+
+	//删除全部数据
+	Hash_delete_all(&users);
+	printf("deletion is succeed!\n");
+	return 0;
+}
+/*liangzheng
+gaoyang
+guoxiongwei
+liuweixin
+luyuan*/

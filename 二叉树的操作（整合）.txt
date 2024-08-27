@@ -1,0 +1,274 @@
+#include<stdio.h>
+#include<stdlib.h>
+struct Node {
+	char date;
+	struct Node* Lchild;
+	struct Node* Rchild;
+};
+struct Nodestack {
+	struct Node* arr;//数组用于存储二叉树
+	int capacity;
+	int size;
+}stack;
+
+//创建栈
+void stackInit(struct Nodestack* stack) {
+	stack->arr = (struct Node*)malloc(4 * sizeof(struct Node));
+	stack->capacity = 4;
+	stack->size = 0;
+}
+//入栈
+void stackPush(struct Nodestack* stack, Node value) {
+	//判断空间大小是否充足
+	if (stack->capacity == stack->size) {
+		//扩容
+		stack->arr = (struct Node*)realloc(stack->arr, 2 * (stack->capacity) * sizeof(struct Node));
+		stack->capacity *= 2;
+	}
+	stack->arr[stack->size++] = value;
+}
+//出栈
+void stackDel(struct Nodestack* stack) {
+	stack->size--;
+}
+//获取栈顶元素
+struct Node* stacktop(Nodestack* stack) {
+	return &(stack->arr[stack->size - 1]);
+}
+//二叉树的创建
+struct Node* treecreat(char* arr,int* pos){
+	//创建一块空间
+	if (arr[*pos] != '#') {
+		Node* root = (struct Node*)malloc(sizeof(struct Node));
+		root->date = arr[*pos];
+		(*pos)++;
+		root->Lchild = treecreat( arr, pos);
+		(*pos)++;
+		root->Rchild = treecreat( arr, pos);
+		return root;
+	}
+	else {
+		return NULL;
+	}
+}
+//二叉树的递归遍历
+void recursionOrder(Node* root) {
+	if (root != NULL) {
+		printf("%c ", root->date);
+		recursionOrder(root->Lchild);
+		recursionOrder(root->Rchild);
+	}
+}
+//非递归前序打印
+void preOrder(Node* root, Nodestack* stack) {
+	if (root == NULL) { printf("无数据，不可打印！\n"); return; }
+	printf("前序打印：");
+	struct Node *cur, *top;
+	cur = root;
+	while (cur  || stack->size != 0) {
+		while (cur) {
+			printf("%c ", cur->date);
+			stackPush(stack, *cur);
+			cur = cur->Lchild;
+		}
+		//取栈顶元素
+		top = stacktop(stack);
+		stackDel(stack);
+		cur = top->Rchild;
+	}
+}
+//非递归遍历中序打印
+void middleOrder(Node* root, Nodestack* stack) {
+	if (root == NULL) { printf("无数据，不可打印！\n"); return; }
+	printf("中序打印：");
+	struct Node *cur, *top;
+	cur = root;
+	while (cur || stack->size != 0) {
+		while (cur) {
+			stackPush(stack, *cur);
+			cur = cur->Lchild;
+		}
+		//取栈顶元素
+		top = stacktop(stack);
+		printf("%c ", top->date);
+		stackDel(stack);
+		cur = top->Rchild;
+	}
+}
+//节点的个数
+void nodeNumber(Node* root,int* number) {
+	if (root) {
+		(*number)++;
+		nodeNumber(root->Lchild,number);
+		nodeNumber(root->Rchild,number);
+	}
+}
+//求某节点所在的深度
+void nodeFind(Node* root, Nodestack* stack, char str, int* flag) {
+	if (root) {
+		stackPush(stack, *root);//先进栈
+		if (root->date == str) {
+			*flag = 1;//遇到则令flag=1，一旦flag=1，则后面的代码都会递归到之前的函数
+			return;
+		}
+
+		if (*flag == 1)return;
+		nodeFind(root->Lchild, stack, str, flag);//向左寻找
+		if (*flag == 1)return;
+		nodeFind(root->Rchild, stack, str, flag);//向右寻找
+		if (*flag == 1)return;//之所以在nodeFind(root->Rchild, stack, str, flag)后面在判断一次是因为不加则会出栈，结果不准
+		stackDel(stack);//每次在没找到的情况下，即递归完这个节点的左右节点之后，都要出栈，保证深度有变化
+	}
+}
+int nodeDeep(Node* root,Nodestack* stack)
+{	
+	getchar();
+	char str;
+	int flag = 0;
+	printf("请输入：");
+	str=getchar();
+	//清空栈
+	stack->size = 0;
+	//找到节点
+	nodeFind(root, stack,str,&flag);
+	return stack->size;
+}
+//求树的深度
+int treeDeep(Node* root) {
+	int m, n;
+	if (root == NULL)return 0;
+	else {
+		m = treeDeep(root->Lchild);
+		n = treeDeep(root->Rchild);
+		if (m > n) {
+			return m + 1;
+		}
+		else {
+			return n + 1;
+		}
+	}
+}
+//已知某个节点求它的子叶数
+struct Node* NodeFound(struct Node* root,char* str,struct Nodestack* stack ) {
+	struct Node* cur = root;
+	struct Node* top;
+	int flag = 0;//作用是str数据在不在二叉树中
+	//清空栈区
+	stack->size = 0;
+	//循环寻找
+	while (cur || stack->size!=0) {
+		while (cur) {
+			//进栈
+			stackPush(stack, *cur);
+			if (cur->date == *str) {
+				flag = 1;
+				break;
+			}
+			cur = cur->Lchild;//进入左子树
+		}
+		//出来的cur一定是一个空指针
+		//取栈顶元素
+		if (flag == 1)break;
+		top = stacktop(stack);
+		stackDel(stack);
+		cur = top->Rchild;//寻找右指针
+	}
+	if (flag == 1) {
+		return &(stack->arr[stack->size - 1]);
+	}
+	else {
+		printf("您要找的数据不在二叉树中！\n");
+		return NULL;
+	}
+}
+int treeNodeNumber(Node* root) {
+	getchar();
+	char str;
+	int flag = 0;
+	printf("请输入：");
+	str = getchar();
+	Node* Neednode = NodeFound(root,&str,&stack);
+	if (Neednode == NULL) { return -1; }//如果找不到数据则返回-1;
+	int number=0;
+	nodeNumber(Neednode, &number);
+	return number-1;
+}
+void menu() {
+	printf("----------------------------------------------------------\n");
+	printf("--------------------1.创建一个二叉树----------------------\n");
+	printf("--------------------2.二叉树递归打印----------------------\n");
+	printf("--------------------3.二叉树非递归前序打印----------------\n");
+	printf("--------------------4.二叉树非递归中序打印----------------\n");
+	printf("--------------------5.二叉树节点的总个数------------------\n");
+	printf("--------------------6.二叉树的深度------------------------\n");
+	printf("--------------------7.二叉树某个节点所在的深度------------\n");
+	printf("--------------------8.二叉树某个节点所有的节点数----------\n");
+	printf("--------------------9.打印菜单----------------------------\n");
+	printf("--------------------10.退出程序---------------------------\n");
+}
+int main() {
+	stackInit(&stack);
+	Node* root = NULL;
+	int number, deep,pos=0;
+	menu();
+	int input;
+	while (true) {
+		printf("请选择：");
+		scanf_s("%d", &input);
+		switch (input)	
+		{
+		case 1:
+			char arr[50];
+			printf("请输入二叉树结构：");
+			getchar();
+			gets_s(arr);
+			root = treecreat(arr,&pos);
+			printf("创建成功！\n");
+			break;
+		case 2:
+			if (root == NULL) { printf("无数据，不可打印！\n"); break; }
+			recursionOrder(root);
+			printf("\n");
+			break;
+		case 3:
+			preOrder(root, &stack);
+			printf("\n");
+			break;
+		case 4:
+			middleOrder(root, &stack);
+			printf("\n");
+			break;
+		case 5:
+			number = 0;
+			nodeNumber(root, &number);
+			printf("二叉树节点个数为：%d\n", number);
+			break;
+		case 6:
+			deep = 0;
+			deep = treeDeep(root);
+			printf("二叉树的深度为：%d\n", deep);
+			break;
+		case 7:
+			deep = 0;
+			deep = nodeDeep(root,&stack);
+			printf("该节点所在的深度为：%d\n",deep);
+			break;
+		case 8:
+			number=0;
+			number = treeNodeNumber(root);
+			if (number != -1) {
+				printf("该节点所拥有的字节数为：%d\n", number);
+			}
+			break;
+		case 9:
+			menu();
+			break;
+		case 10:
+			printf("程序已退出！\n");
+			exit(-1);
+			break;
+		}
+	}
+	return 0;
+}
+//abc##d#e##fg##h##

@@ -1,0 +1,219 @@
+================================main=============================
+#include<stdio.h>
+#include<stdlib.h>
+#include"Function.h"
+
+struct String L;
+void menu() {
+	printf("-----------------------------请选择-----------------------------\n");
+	printf("1.字符串的赋值\n");
+	printf("2.求字符串的个数\n");
+	printf("3.输出某段字符串\n");
+	printf("4.插入某段字符串\n");
+	printf("5.删除某段字符串\n");
+	printf("6.定位到某段字符串\n");
+	printf("7.与某段字符串相连接\n");
+	printf("8.退出程序！\n");
+	printf("-----------------------------------------------------------------\n");
+	
+}
+int main() {
+	int input;
+	menu();
+	while (true) {
+		printf("您的选择是：");
+		scanf_s("%d", &input);
+		switch(input){
+		case 1:
+			Establish(&L);
+			break;
+		case 2:
+			printf("%d个\n",Length(&L));
+			break;
+		case 3:
+			Substring(&L);
+			break;
+		case 4:
+			StrInsert(&L);
+			break;
+		case 5:
+			StrDel(&L);
+			break;
+		case 6:
+			StrIndex(&L);
+			break;
+		case 7:
+			StrConnection(&L);
+			break;
+		case 8:
+			printf("程序已退出\n");
+			exit(-1);
+			break;
+		}
+	}
+	return 0;
+}
+=================================definition===============================
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include"Function.h"
+
+void Establish(String* str) {
+	memset(str->date , 0, sizeof(str->date));
+	str->leng = 0;
+	printf("请输入字符串：");
+	getchar();
+	gets_s(str->date);
+	str->leng = strlen(str->date);
+	printf("创建成功！\n");
+}
+int Length(String* str) {
+	return str->leng;
+}
+void Substring(String* str) {
+	if (str->leng == 0) {
+		printf("当前无数据，无法输出！\n");
+		return;
+	}
+	int star, end;
+	printf("请分别输入开始和结束的字符串位置：");
+	scanf_s("%d %d", &star, &end);
+	if (end - star <= 0) {
+		printf("输入有误!\n");
+		return;
+	}
+	//判断能否足够提取出来
+	if ((str->leng - star) < (star - end)) {
+		printf("已超出字符串长度\n");
+		return ;
+	}
+	//字符串赋值
+	for (int i = star - 1; i < end; i++) {
+		printf("%c",str->date[i]);
+	}
+	printf("\n");
+}
+void StrInsert(String* str) {
+	if (str->leng == 0) {
+		printf("当前无字符串，请先赋值\n");
+		return;
+	}
+	int index;
+	printf("请输入开始插入的位置：");
+	scanf_s("%d", &index);
+	char arr[10];
+	getchar();
+	printf("请输入要插入的字符串：");
+	gets_s(arr);
+	int len = strlen(arr);//计算arr有多少个字符
+	int indexs = index;
+	if (str->leng + len > MAX||index<0||index>str->leng) {
+		printf("字符串溢出！\n");
+		return;
+	}
+	//一共移动index次，每一次移动（strleng-index）个元素
+	for (int i = 0; i < len; i++) {
+		for (int j = str->leng; j >indexs ; j--) {
+			str->date[j] = str->date[j-1];
+		}
+		str->leng++;
+		indexs++;
+	}
+	//将arr搞上去
+	for (int j = index ,time=0; j <= index + len - 1; j++,time++) {
+		str->date[j] = arr[time];
+	}
+	puts(str->date);
+	printf("插入成功！\n");
+}
+void StrDel(String* str) {
+	if (str->leng == 0) {
+		printf("当前无字符串，无法删除\n");
+		return;
+	}
+	int index, len;
+	printf("请输入从第几个位置删除和删除的字节数?");
+	scanf_s("%d %d", &index, &len);
+	if (str->leng - index+1 < len || index<0 || index>str->leng) {
+		printf("字符串溢出！\n");
+		return;
+	}
+	int strleng;
+	int lens = len;//一共要挪lens次（因为有lens个字符）
+	int size = str->leng - (index + len) + 1;//没挪动一次，要挪动size个字符
+	for (int i = 0; i < lens; i++) {
+		int k = 0;
+		strleng = index + len - 1;
+		for (strleng, k = 0; k < size;k++) {
+			str->date[strleng-1] = str->date[strleng];
+			strleng++;
+		}
+		str->date[--str->leng] = '\0';
+		len--;//因为一个字符已经被删走了.
+	}
+	puts(str->date);
+}
+void StrIndex(String* str) {
+	if (str->leng == 0) {
+		printf("当前无字符串，无法定位\n");
+		return;
+	}
+	char arr[10];
+	printf("请输入字符串：");
+	getchar();
+	gets_s(arr);
+	if (strlen(arr) + str->leng > 50) {
+		printf("字符串溢出!\n");
+		return;
+	}
+	int len = strlen(arr);
+	int j = 0,index;
+	for (int i = 0; i < str->leng; i++) {
+		if (arr[j] == str->date[i]) {
+			j++;
+			index = i;
+		}
+		else {
+			j = 0;
+		}
+		if (j == len) {
+			printf("其所在位置是：%d\n", index - len + 1 + 1);
+			return;
+		}
+	}
+	printf("无此数据！\n");
+}
+void StrConnection(String* str) {
+	char arr[10];
+	printf("请输入您要插入的字符串:\n");
+	getchar();
+	gets_s(arr);
+	int len = strlen(arr);
+	if (str->leng + len > 50) {
+		printf("字符串溢出！\n");
+		return;
+	}
+	int  j;
+	for (str->leng, j = 0; j < len; j++) {
+		str->date[str->leng++] = arr[j];
+	}
+	puts(str->date);
+	printf("插入成功！\n");
+}
+=============================Function=================================
+#pragma once
+#define MAX 80
+struct String{
+	char date[MAX];
+	int leng=0;
+};
+
+//定义一个函数
+void Establish(String* str);//字符串的赋值
+int Length(String* str);//字符串的长度
+void Substring(String* str);//求某段字符串操作
+void StrInsert(String* str);//插入某段字符串
+void StrDel(String* str);//删除某段字符串
+void StrIndex(String* str);//定位某段字符串
+void StrConnection(String* str);//与某个字符串相连s

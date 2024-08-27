@@ -1,0 +1,308 @@
+-------------------------------------------------------main----------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include"Function calls.h"
+
+struct List* head;
+void menu(){
+	
+	printf("-----------------------请选择------------------------\n");
+	printf("1.创建链表\n");
+	printf("2.尾插数据\n");
+	printf("3.尾删数据\n");
+	printf("4.头插数据\n");
+	printf("5.头删数据\n");
+	printf("6.插入数据\n");
+	printf("7.删除数据\n");
+	printf("8.展示所有数据\n");
+	printf("9.数据的总个数\n");
+	printf("10.删除所有数据\n");
+	printf("11.推出程序\n");
+	printf("-----------------------------------------------------\n");
+}
+int main(){
+	int input;
+	while (true) {
+		menu();
+		printf("请选择：");
+		scanf_s("%d", &input);
+		switch(input) {
+		case 1:
+			head=ListInit(head);
+			printf("创建成功！\n");
+			break;
+		case 2:
+			ListtailInsert(head);
+			break;
+		case 3:
+			ListtailDel(head);
+			break;
+		case 4:
+			ListheadInsert(head);
+			break;
+		case 5:
+			ListheadDel(head);
+			break;
+		case 6:
+			ListmiddleInsert(head);
+			break;
+		case 7:
+			ListmiddleDel(head);
+			break;
+		case 8:
+			Listprint(head);
+			break;
+		case 9:
+			printf("%d", Listnumber(head));
+			break;
+		case 10:
+			ListDestroy(head);
+			break;
+		case 11:
+			exit(-1);
+			break;
+		}
+		printf("\n");
+	}
+	return 0;
+}
+----------------------------------------------------interface------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include"Function calls.h"
+
+//函数的定义
+
+//函数的初始化
+struct List* ListInit(List* head) {
+	//哨兵
+	//申请空间
+	head = (struct List*)malloc(sizeof(struct List));
+	//指针指向
+	head->next = head;
+	head->pre = head;
+	return head;
+}
+int Listnumber(List* head) {
+	int count = 0;
+	if (head->next == head) {
+		return count;
+	}
+	struct List* phead = head->next;
+	while (phead != head) {
+		count++;
+		phead = phead->next;
+	}
+	return count;
+}
+void Listprint(List* head) {
+	if (head->next == head||Listnumber(head)==0) {
+		printf("当前无数据！");
+		return ;
+	}
+	struct List* phead = head->next;
+	while (phead != head) {
+		printf("%d ", phead->date);
+		phead = phead->next;
+	}
+	printf("\n");
+}
+void ListtailInsert(List* head) {
+
+	int x;
+	printf("请输入新数据：");
+	scanf_s("%d", &x);
+	
+	//创建节点
+	struct List* newdate; 
+	newdate=(struct List*)malloc(sizeof(struct List));
+	newdate->date = x;
+	newdate->next = NULL;
+	newdate->pre = NULL;
+
+	//找到最后一个节点指针并定义
+	struct List* tail = head->pre;
+
+	//改变指针指向
+	tail->next = newdate;
+	newdate->pre = tail;
+	newdate->next = head;
+	head->pre = newdate;
+	printf("已插入！\n");
+}
+void ListtailDel(List* head) {
+	
+	if (head->next == head) {
+		printf("无数据，不能删除!");
+		return;
+	}
+	//定义倒数第一、第二个的指针
+	struct List* tail = head->pre;
+	struct List* sectail = tail->pre;
+
+	sectail->next = head;
+	head->pre = sectail;
+	free(tail);
+	printf("已删除！\n");
+}
+void ListheadInsert(List* head) {
+	
+	int x;
+	printf("请输入数据：");
+	scanf_s("%d", &x);
+
+	//创建节点
+	struct List* newdate;
+	newdate =(struct List*) malloc(sizeof(struct List));
+	newdate->date = x;
+	newdate->next = NULL;
+	newdate->pre = NULL;
+
+	//将第一个节点定义
+	struct List* phead = head->next;
+
+	//改变指针指向
+	head->next = newdate;
+	newdate->pre = head;
+	phead->pre = newdate;
+	newdate->next = phead;
+	
+	printf("已插入\n");
+}
+void ListheadDel(List* head) {
+	if (head->next == head) {
+		printf("无数据，不能删除！");
+		return;
+	}
+
+	//定义第一个和第二个节点的指针
+	struct List* phead = head->next;
+	struct List* pphead = phead->next;
+
+	head->next = pphead;
+	pphead->pre = head;
+	free(phead);
+	printf("已删除！\n");
+}
+void ListmiddleInsert(List* head) {
+	//统计个数
+	int count=Listnumber(head);
+	int x, index;
+	printf("请选择你要插入的位置：");
+	scanf_s("%d", &index);
+
+	if (index<0 || index>count||count==0) {
+		if (index < 0) {
+			ListheadInsert(head);
+		}
+		else {
+			ListtailInsert(head);
+		}
+	}
+	else {
+
+		printf("请输入数据：");
+		scanf_s("%d", &x);
+
+		//创建节点
+		struct List* newdate;
+		newdate = (struct List*)malloc(sizeof(struct List));
+		newdate->date = x;
+		newdate->next = NULL;
+		newdate->pre = NULL;
+
+		//定位到当前位置
+		//定义节点，一前一后
+		struct List *prev, *pc;
+		prev = head;
+		pc = prev->next;
+
+		//定位到当前位置
+		int i = 1;
+		for (i, prev, pc; i < index; i++, prev = prev->next, pc = pc->next);
+
+		//节点指针指向
+		newdate->next = pc;
+		pc->pre = newdate;
+		prev->next = newdate;
+		newdate->pre = prev;
+		printf("插入成功！\n");
+	}
+}
+void ListmiddleDel(List* head) {
+
+	int count = Listnumber(head);
+	if (count == 0||head->next==head) {
+		printf("无数据，无法删除！\n");
+		return;
+	}
+	int index;
+	printf("请选择你要删除的位置：");
+	scanf_s("%d", &index);
+
+	if (index <= 0 && index >= count) {
+		if (index <= 0) {
+			ListheadDel(head);
+		}
+		else if(index>count){
+			ListtailDel(head);
+		}
+		else {
+			ListheadDel(head);
+		}
+	}
+	else {
+		//创建节点
+		struct List *prev, *pc,*pcc;
+		prev = head;//在i前面
+		pc = prev->next;//与i的位置一样
+		pcc = pc->next;//在i后面
+
+		//定位到该位置
+		int i;
+		for (i = 1, prev, pc, pcc; i < index; i++, prev = prev->next, pc = pc->next, pcc = pcc->next);
+		
+		//执行删除
+		prev->next = pcc;
+		pcc->pre = prev;
+		free(pc);
+		printf("删除成功!\n");
+	}
+}
+struct List* ListDestroy(List* head) {
+	
+	//两个辅助指针
+	struct List *pre, *pc;
+	pre = head->next;
+	pc = pre->next;
+
+	while (pc != head) {
+		free(pre);
+		pre = pc;
+		pc = pc->next;
+	}
+	head->next = head;
+	head->pre = head;
+	return head;
+	printf("已删除\n");
+}
+-------------------------------Function calls.h-------------------------------------------------------
+#pragma once
+//定义链表
+struct List {
+	int date;
+	struct List* pre;
+	struct List* next;
+};
+
+//函数的声明
+struct List* ListInit(List* head);//创建链表
+void ListtailInsert(List* head);//尾插节点
+void ListtailDel(List* head);//尾删节点
+void ListheadInsert(List* head);//头插节点
+void ListheadDel(List* head);//头删数据
+void ListmiddleInsert(List* head);//中间插入节点
+void ListmiddleDel(List* head);//中间删除节点
+struct List* ListDestroy(List* head);//销毁节点
+void Listprint(List* head);//打印节点
+int Listnumber(List* head);//统计节点个数

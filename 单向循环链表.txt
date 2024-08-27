@@ -1,0 +1,259 @@
+----------------------------------------main-----------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+#include "Function calls.h"
+//循环链表
+struct List *head;
+void menu(){
+	printf("--------------------------请选择--------------------------\n");
+	printf("1.创建循环链表\n");
+	printf("2.修改节点的值\n");
+	printf("3.删除节点\n");
+	printf("4.插入节点\n");
+	printf("5.清空链表\n");
+	printf("6.输出所有数据\n");
+	printf("7.退出程序！\n");
+	printf("----------------------------------------------------------\n");
+
+}
+int main() {
+	head = NULL;
+	int input;
+	menu();
+	while (true) {
+		printf("\n您的选择是：");
+		scanf("%d", &input);
+		switch (input)
+		{
+		case 1:
+			head = ListInit(head);
+			break;
+		case 2:
+			ListModify(head);
+			break;
+		case 3:
+			head = ListDele(head);
+			break;
+		case 4:
+			head = ListInsert(head);
+			break;
+		case 5:
+			head = ListClean(head);
+			break;
+		case 6:
+			print(head);
+			break;
+		case 7:
+			printf("程序已退出！");
+			exit(-1);
+			break;
+		}
+	}
+}
+----------------------------------------interface-------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include"Function calls.h"
+
+
+//链表的初始化与创建节点
+struct List* ListInit(struct List* head) {
+	struct List  *q;
+	int x;
+	while (true) {
+		printf("请输入一个数：");
+		scanf("%d", &x);
+		if (x == 0) {
+			return head;
+		}
+		struct List *p;
+		p = (struct List*)malloc(sizeof(struct List));
+		p->date = x;
+		p->pl = NULL;
+		if (head==NULL) {
+			head = p;
+			p->pl = head;
+		}
+		else {
+			q->pl = p;
+			p->pl = head;
+		}
+		q = p;
+	}
+	return head;
+}
+void print(struct List*head) {
+	if (head == NULL) {
+		return;
+	}
+	struct List *item=head->pl;
+	printf("%d ", head->date);
+	while (head!= item) {
+		printf("%d ", item->date);
+		item = item->pl;
+	}
+}
+void ListModify(struct List*head) {//修改节点的值
+	if (head == NULL) {
+		printf("无数据,无法修改！");
+		return;
+	}
+	int index,newdate;
+	printf("请输入第几个节点：");
+	scanf("%d", &index);
+	printf("\n将该节点的值修改为：");
+	scanf("%d", &newdate);
+	struct List* item = head;
+	int i = 1;
+	//找到节点所在的位置
+	for (item = head, i; i != index; i++, item = item->pl);
+	item->date = newdate;
+}
+struct List* ListDele(struct List* head) {
+	if (head == NULL) {
+		printf("无数据，无法删除!");
+		return head;
+	}
+	int index;
+	printf("您要删除节点的位置是：");
+	scanf("%d", &index);
+	//定义变量
+	int i = 1;
+	struct List* pre = head;
+	struct List* pc = pre->pl;
+
+	//统计节点个数
+	int count = Listleng(head);
+	//找到节点所在的位置
+	for (i, pre, pc; i < index-1; i++, pre = pre->pl, pc = pc->pl);
+	if (i== 1) {
+		pre = head;
+		while (pc->pl != head) {
+			pc = pc->pl;
+		}
+		pc->pl = head->pl;
+		free(head);
+		return pc->pl;
+	}
+	else if (i > count) {
+		pre = head;
+		pc = pre->pl;
+		while (pc->pl != head) {
+			pre = pc;
+			pc = pc->pl;
+		}pre->pl = head;
+		free(pc);
+	}
+	else {
+		pre->pl = pc->pl;
+		free(pc);
+	}
+	printf("已删除！\n");
+	return head;
+}
+struct List* ListInsert(struct List* head) {
+	int index,n;
+	printf("请选择你要插入的位置：");
+	scanf("%d", &index);
+	printf("您要插入的数据是：");
+	scanf("%d", &n);
+	struct List* pc = head->pl;
+	struct List* pre = head;
+
+	//新节点
+	struct List* newdate = (struct List*)malloc(sizeof(struct List));
+	newdate->date = n;
+	newdate->pl = NULL;
+
+	//统计结点的个数
+	int count = Listleng(head);
+	pc = head->pl;
+	pre = head;	
+	
+	//如果在第一个位置插入或者最后一个位置
+	if (index == 1||index>=count) {
+		if (count == 1&&index==1) {//如果只有一个节点
+			head->pl = newdate;
+			newdate->pl = head;
+			head = newdate;//头指针改变
+		}
+		else if(count>1&&index==1){//如果有一个以上
+			//让pc指向最后一个
+			pc = head->pl;
+			while (pc->pl != head) {
+				pc = pc->pl;
+			}//改变指针方向
+			pc->pl = newdate;
+			newdate->pl = head;
+			head = newdate;
+		}
+		else if (index > count&&count>=1) {//在最后一个位置
+			pc = head->pl;
+			while (pc->pl != head) {
+				pc = pc->pl;
+			}//改变指针方向
+			newdate->pl = head;
+			pc->pl = newdate;
+		}
+	}
+	else if(index<count&&index>1)
+	{//选择在中间插入
+		int i;
+		for (i = 1, pre, pc; i < index; i++, pre=pre->pl, pc = pc->pl);
+		pre->pl = newdate;
+		newdate->pl = pc;
+	}
+
+	return head;
+}
+struct List* ListClean(struct List *head) {
+	if (head == NULL) { printf("已清空\n"); return NULL; }
+	struct List *pc, *pre;
+	pc = head->pl;
+	pre = head;
+	while (true) {
+		if (pc != head) {
+			free(pre);
+			pre = pc;
+			pc = pc->pl;
+		}
+		else {
+			free(pre);
+			printf("销毁成功！\n");
+			return NULL;
+		}
+	}
+}
+int Listleng(List* head) {
+	int count;
+	struct List* pc;
+	if (head == NULL) {
+		count = 0;
+		//创造变量
+	}
+	else {
+		count = 1;
+		pc = head->pl;
+		while (pc != head) {
+			count++;
+			pc = pc->pl;
+		}
+	}
+	return count;
+}
+----------------------------------------------Function calls----------------------------------
+#pragma once
+//定义一个链表开始节点
+struct List {
+	int date;
+	struct List* pl;
+};
+
+//定义下列函数
+struct List* ListInit(List* head);//链表的初始化与创建节点
+void ListModify(List* head);//修改节点的值
+struct List* ListDele(List* head);//删除节点
+struct List* ListInsert(List* head);//插入一个节点
+struct List* ListClean(List* head);//清空节点
+void print(List* head);//输出节点
+int Listleng(List* head);

@@ -1,0 +1,92 @@
+//约瑟夫环 
+#include <stdio.h>
+#include <stdlib.h>
+struct Node {
+	char a;
+	struct Node*next;
+};
+bool Init_Node(struct Node**head) {
+	(*head) = (struct Node*)malloc(sizeof(Node));
+	(*head)->next = (*head);
+	return true;
+}
+bool Creat_Node(struct Node**head, char*arr) {
+	int i = 0;
+	struct Node* pc;
+	while (arr[i] != '\0') {
+		if (i == 0) {
+			(*head)->a = arr[i];
+			pc = (*head);
+			i++;
+			continue;
+		}
+		struct Node*item = (struct Node*)malloc(sizeof(Node));
+		item->a = arr[i];
+		pc->next = item;
+		pc = item;
+		item->next = (*head);
+		i++;
+	}
+	return true;
+}
+int Num_Node(struct Node** head) {
+	struct Node* pc = (*head)->next;
+	int number = 1;
+	while (pc != (*head)) {
+		number++;
+		pc = pc->next;
+	}
+	return number;
+}
+struct Node* third_Node(struct Node** head, struct Node** tail) {
+	struct Node* pc = (*head);
+	for (int i = 0; i < 2; i++) {
+		*tail = pc;
+		pc = pc->next;
+	}
+	(*head) = pc->next;
+	return pc;
+}
+void destory_Node(struct Node**pc, struct Node**head, struct Node** tail) {
+	if ((*head)->next == (*head)) {
+		printf("%c ", (*head)->a);
+		free(*head);
+		return;
+	}
+	(*tail)->next = (*pc)->next;
+	printf("%c ", (*pc)->a);
+	free(*pc);
+}
+void circus_Node_del(struct Node**head) {
+	int number = Num_Node(head);
+	int i = 0;
+	struct Node* pc,*tail;
+	while (i < number) {
+		pc = third_Node(head,&tail);
+		destory_Node(&pc, head,&tail);
+		i++;
+	}
+}
+void Print_Node(struct Node**head) {
+	struct Node* pc = (*head)->next;
+	printf("%c ", (*head)->a);
+	while (pc != (*head)) {
+		printf("%c ", pc->a);
+		pc = pc->next;
+	}
+	printf("\n");
+}
+int main() {
+	struct Node*head;
+	if (Init_Node(&head)) {
+		printf("it has contribute!\n");
+	}
+	char arr[99];
+	gets_s(arr);
+	if (Creat_Node(&head, arr)) {
+		printf("creation is success!\n");
+	}
+	Print_Node(&head);
+	circus_Node_del(&head);
+	return 0;
+}

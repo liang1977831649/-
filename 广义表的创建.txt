@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+
+typedef struct GLNode {
+	int tage;
+	union{
+		char atom;
+		struct {
+			struct GLNode *hp, *tp;
+		}ptr;
+	};
+}*Glist,GNode;
+ Glist creat(Glist C) {
+	C = (Glist)malloc(sizeof(GNode));
+	C->tage = 1;
+	//表头原子创造一个空间来存放'a'
+	C->ptr.hp = (Glist)malloc(sizeof(GNode));
+	C->ptr.hp->tage = 0;
+	C->ptr.hp->atom = 'a';
+	//表尾巴是也一个子表
+	C->ptr.tp = (Glist)malloc(sizeof(GNode));
+	C->ptr.tp->atom = 1;
+	C->ptr.tp->ptr.tp = NULL;//（a,(b,c)）有两个元素，故后面指针指向空
+	C->ptr.tp->ptr.hp = (Glist)malloc(sizeof(GNode));
+	//(a,(b,c))中的a腾出一块空间来存放（b，c),
+	C->ptr.tp->ptr.hp->tage = 1;
+	C->ptr.tp->ptr.hp->ptr.hp = (Glist)malloc(sizeof(GNode));
+	//(a,(b,c,d))中的a腾出一块那块空间中在腾出一块空间来存放来存放'b',
+	C->ptr.tp->ptr.hp->ptr.hp->atom = 'b';
+	C->ptr.tp->ptr.hp->ptr.hp->tage = 0;
+	//(b,c,d)中b的尾巴在腾出一块空间来给(c,d)，(c,d)又是一个表
+	C->ptr.tp->ptr.hp->ptr.tp = (Glist)malloc(sizeof(GNode));
+	C->ptr.tp->ptr.hp->ptr.tp->tage = 1;
+	//(c,d)的头在腾出空间存放‘c’
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.hp=(Glist)malloc(sizeof(GNode));
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.hp->tage = 0;
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.hp->atom = 'c';
+	//(c,d)中的表尾是（d)是一个表
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp = (Glist)malloc(sizeof(GNode));
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp->tage = 1;
+	//在（d）中开辟一块空间存放d
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp->ptr.hp = (Glist)malloc(sizeof(GNode));
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp->ptr.hp->tage = 0;
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp->ptr.hp->atom = 'd';
+	//将末尾指针置空
+	C->ptr.tp->ptr.hp->ptr.tp->ptr.tp->ptr.tp = NULL;
+}
+int main() {
+	Glist C = NULL;
+	C = creat(C);
+	return 0;
+}

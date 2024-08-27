@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include<stdlib.h>
+//将链表信息写入一个txt文件中
+
+//定义一个简单链表
+struct Node
+{
+	char name[30];
+	int age;
+	struct Node* next;
+};
+void Getstatic(Node* item) {
+	gets_s(item->name);
+	scanf_s("%d", &(item->age));
+}
+struct Node* Node_Init(struct Node* head) {
+	if (head ==NULL) {
+		struct Node* item = (struct Node*)malloc(sizeof(Node));
+		Getstatic(item);
+		head= item;
+		head->next = NULL;
+		return head;
+	}
+
+	//创建一个指针并定位到尾节点
+	struct Node* tail = head;
+	for (tail; tail->next != NULL; tail = tail->next);
+
+	struct Node* item = (struct Node*)malloc(sizeof(Node));
+	getchar();
+	Getstatic(item);
+	tail->next = item;
+	item->next = NULL;
+	return head;
+}
+void Destory_List(struct Node** head) {
+	struct Node* pre, *pc;
+	pre = *head;
+	pc = (*head)->next;
+	while (pre != NULL) {
+		free(pre);
+		pre = pc;
+		if (pc) {
+			pc = pc->next;
+		}
+	}
+	*head = NULL;
+}
+int main() {
+	//头指针
+	struct Node* head=NULL;
+	//创建单向循环链表
+	for (int i = 0; i < 3; i++)
+	{	
+		head=Node_Init(head);
+	}
+	//打开一个文件
+	FILE* pf = fopen("date.txt", "w");
+	if (!pf) {
+		printf("opening was fail\n");
+		return 0;
+	}
+	//写入文件
+	struct Node* pre = head;
+	while (pre) {
+		fprintf(pf,"%s %d\n",pre->name,pre->age);
+		pre = pre->next;
+	}
+	fclose(pf);
+	printf("writing is sucessed!\n");
+
+	//销毁链表
+	Destory_List(&head);
+	printf("Destroy is sucssed!\n");
+	
+	//将txt里的内容读到结构链表中
+	
+	//先打开文件
+	FILE* pr = fopen("date.txt", "r");
+	if (!pr) {
+		printf("open is error!\n");
+		return 0;
+	}
+	struct Node* tail=NULL;
+	//存入数据
+	while (!feof(pr)) {
+		struct Node* pre = (struct Node*)malloc(sizeof(struct Node));
+		if (head == NULL) {
+			fscanf(pr, "%s %d\n", pre->name, &pre->age);
+			head = pre;
+		}
+		else {
+			//定位到尾指针
+			tail = head;
+			for (tail; tail->next != NULL; tail=tail->next);
+			fscanf(pr, "%s %d\n", pre->name, &pre->age);
+			tail->next = pre;
+		}
+		pre->next = NULL;
+	}
+	tail = head;
+	while (tail) {
+		printf("%s %d\n", tail->name, tail->age);
+		tail = tail->next;
+	}
+	return 0;
+}

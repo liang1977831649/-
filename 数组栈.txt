@@ -1,0 +1,140 @@
+----------------------------------------------main------------------------------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include"Function calls.h"
+struct stack l;
+void meun() {
+	printf("----------------------请做出选择---------------------------\n");
+	printf("1.压栈\n");
+	printf("2.出栈\n");
+	printf("3.栈是否为空\n");
+	printf("4.清空栈\n");
+	printf("5.销毁栈\n");
+	printf("6.打印栈\n");
+	printf("7.退出程序\n");
+	printf("-----------------------------------------------------------\n");
+}
+int main() {
+	int input;
+	StackInit(&l);
+	while (true) {
+		meun();
+		printf("请选择：");
+		scanf_s("%d", &input);
+		switch (input)
+		{
+		case 1:
+			StackPush(&l);
+			break;
+		case 2:
+			StackPop(&l);
+			break;
+		case 3:
+			StackEmpty(&l);
+			break;
+		case 4:
+			StackClean(&l);
+			break;
+		case 5:
+			StackDestory(&l);
+			break;
+		case 6:
+			StackPrint(&l);
+			break;
+		case 7:
+			printf("已退出\n");
+			exit(-1);
+			break;
+		}
+	}
+	return 0;
+}
+--------------------------------------------interface---------------------------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+#include "Function calls.h"
+
+void StackInit( stack* l) {
+	l->p = NULL;
+	l->size = l->capacity = 0;
+	printf("栈已创建！\n");
+}
+int StackEmpty(stack* l) {
+	if (l->size == 0) {
+		return 0;
+	}
+	return 1;
+}
+void Stacknewcapacity(stack* l){
+	if (l->capacity == l->size) {
+		if (l->capacity == 0) {
+			l->p = (int*)malloc(4 * sizeof(int));
+			l->capacity = 4;
+			printf("内存分配成功！\n");
+		}
+		else {
+			l->capacity *= 2;
+			int* item = (int*)realloc(l->p, (l->capacity) * sizeof(int));
+			printf("内存分配成功！\n");
+		}
+	}
+}
+void StackPush(stack* l) {
+	int x;
+	printf("请输入数据：");
+	scanf_s("%d", &x);
+	if (l->capacity==l->size) {
+		Stacknewcapacity(l);
+		l -> p[l->size] = x;
+	}
+	else {
+		l->p[l->size] = x;
+	}
+	l->size++;
+	printf("已入栈！\n");
+}
+void StackPop(stack* l) {
+	if (l->size == 0) {
+		printf("已出栈！\n");
+		return;
+	}
+	l->size--;
+	printf("已出栈！\n");
+}
+void StackClean(stack* l) {
+	l->size = 0;
+	printf("已清空！\n");
+}
+void StackDestory(stack* l) {
+	free(l->p);
+	l->p = NULL;
+	l->capacity = l->size = 0;
+	printf("已销毁！\n");
+}
+void StackPrint(stack* l) {
+	if (l->size == 0) {
+		printf("无数据!\n");
+		return;
+	}
+	while (l->size != 0) {
+		printf("%d ", l->p[--l->size]);
+	}
+	printf("\n");
+}
+-----------------------------------------------Function calls---------------------------------------------------
+#pragma once
+struct stack {
+	int* p;
+	int size;
+	int capacity;
+};
+
+
+//函数的声明
+void StackInit( stack* l);//创建栈
+int StackEmpty(stack* l);//判断栈是否为空
+void StackPush(stack* l);//压栈
+void StackPop(stack* l);//出栈
+void StackClean(stack* l);//清空栈
+void StackDestory(stack* l);//销毁栈
+void StackPrint(stack* l);//打印栈

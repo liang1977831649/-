@@ -1,0 +1,412 @@
+#include<stdlib.h>
+#include<stdio.h>
+#define MAX 10
+typedef int Newtype;
+//节点信息
+struct Node {
+	Newtype date;//节点的数据域
+	struct Node* next;//节点的下一个指针
+};
+
+//数组顶点信息
+struct Vnode {
+	Newtype vex;//数组头顶点的数据域
+	struct Node* fistedge;//数组头顶点的指针来指向节点
+};
+
+//整个数组和节点信息
+struct Algraph {
+	struct Vnode ArrVernode[MAX];//该数组用来存储头顶点
+	int vexnum;//顶点数目
+	int edgenum;
+};
+
+//新建一个队列，用于遍历图
+struct ALGqueue {
+	Newtype Data;
+	struct ALGqueue *next;
+};
+
+//定义一个栈
+struct Stacknode {
+	Newtype date;
+};
+
+//定义一个用于存储栈的数组
+struct Stackarr {
+	struct Stacknode arr[MAX];
+	int top;
+	int capacity;
+};
+
+//栈的初始化
+void Stackarr_init(struct Stackarr* SA) {
+	SA->top = SA->capacity = 0;
+}
+
+//入栈
+void Stack_push(Newtype dates, struct Stackarr* SA) {
+	if (SA->top == MAX) {
+		printf("空间不足！\n");
+		return;
+	}
+	Stacknode* Newdate = (Stacknode*)malloc(sizeof(Stacknode));
+	Newdate->date = dates;
+
+	SA->arr[SA->top++].date = dates;
+}
+
+//出栈
+void Stack_pop(struct Stackarr* SA) {
+	SA->arr[--SA->top].date = -858993460;
+}
+
+//取栈顶元素
+struct Vnode* Stack_top(struct Stackarr* SA,struct Algraph* g) {
+	for (int i = 0; i < g->vexnum; i++) {
+		if (SA->arr[SA->top - 1].date == g->ArrVernode[i].vex) {
+			return &g->ArrVernode[i];
+		}
+	}
+}
+//定义数组，用于存顶点
+struct Node_arr {
+	Newtype Narr[MAX];
+	int size;
+};
+
+//将arr访问数组全置为零；
+void Zero_arr(Node_arr *arr) {
+	int x;
+	for (int i = 0; i < MAX; i++) {
+		arr->Narr[i] = -858993460;
+	}
+	arr->size = 0;
+}
+
+//初始化数组
+void Node_arr_init(struct Node_arr* arr) {
+	arr->size = 0;
+}
+
+//判断是否访问过
+int access(struct Node_arr* arr, Newtype date) {
+	for (int i = 0; i < arr->size; i++) {
+		if (arr->Narr[i] == date) {
+			return 0;
+		}
+	}
+	return 1;
+}
+//入队
+void ALGgraph_push(Newtype date, struct ALGqueue** head, struct ALGqueue** tail) {
+	//先创造一个节点
+	struct ALGqueue* Newdate = (struct ALGqueue*)malloc(sizeof(struct ALGqueue));
+	Newdate->Data = date;
+	Newdate->next = NULL;
+	//如果第一次链接
+	if (*head == NULL) {
+		*head = *tail = Newdate;
+	}
+	else {
+		(*tail)->next = Newdate;
+		(*tail) = Newdate;
+	}
+}
+
+//出队
+void ALGgraph_out(struct ALGqueue **head, struct ALGqueue **tail) {
+	struct ALGqueue* pre = (*head);
+	(*head) = (*head)->next;
+	if (*head != *tail) {
+		free(pre);
+	}
+	else if (*head == *tail) {
+		free(pre);
+		*tail = NULL;
+	}
+}
+void creat_Graph(Algraph* ALG) {
+	printf("please input the number of vex:");//输入顶点的数目
+	scanf_s("%d", &ALG->vexnum);
+	printf("please input the information of vex:");//输入顶点的信息，存入数组
+	for (int i = 0; i < ALG->vexnum; i++) {
+		scanf_s("%d", &(ALG->ArrVernode[i].vex));
+		ALG->ArrVernode[i].fistedge = NULL;
+	}
+	int ver, time, j = 0, count = 0;
+	for (int i = 0; i < ALG->vexnum; i++) {
+		printf("please input times of number %d:", ALG->ArrVernode[i].vex);//输入边的数目
+		scanf_s("%d", &time);//输入第i个元素的边的数目
+		if (time == 0) {
+			continue;
+		}
+		//找关系
+		printf("please input relation between %d and edgenode:", ALG->ArrVernode[i].vex);
+		while (j < time) {
+			scanf_s("%d", &ver);//输入数据
+			struct Node* Newver = (struct Node*)malloc(sizeof(struct Node));
+			Newver->date = ver;
+			Newver->next = NULL;
+
+			//顶点与数组的连接
+			//fistedge总是指向第一个元素的
+			Newver->next = ALG->ArrVernode[i].fistedge;
+			ALG->ArrVernode[i].fistedge = Newver;
+
+			j++;
+			count++;//计算数目
+		}
+		j = 0;
+	}
+	ALG->edgenum = count / 2;
+	printf("\n");
+}
+void print_Graph(struct Algraph* ALG) {
+	struct Node *pc;
+	for (int i = 0; i < ALG->vexnum; i++) {
+		pc = ALG->ArrVernode[i].fistedge;
+		printf("vertax %d:", ALG->ArrVernode[i].vex);
+		while (pc) {
+			printf("[%d]->", pc->date);
+			pc = pc->next;
+		}printf("NULL\n");
+	}
+}
+
+//图的广度优先算法1
+void BFS_Graph(struct Algraph* g, struct Node_arr* arr, ALGqueue **head, ALGqueue **tail) {
+	int i = 0, pos = -1, time = 0;
+	struct ALGqueue *pc;
+	struct Node *pre;
+	while (arr->size < g->vexnum) {
+		//第一次进入时候，*head==null，但当数组[i]是孤立时，也可以进入条件	
+		if (*head == NULL) {
+			//将数组头顶点记录
+			if (access(arr, g->ArrVernode[i].vex)) {
+				arr->Narr[arr->size++] = g->ArrVernode[i].vex;
+				ALGgraph_push(g->ArrVernode[i].vex, &(*head), &(*tail));
+				pre = g->ArrVernode[i].fistedge;
+				i++;
+				//头节点后面的也要入队
+				while (pre) {
+					if (access(arr, pre->date)) {
+						arr->Narr[arr->size++] = pre->date;
+						ALGgraph_push(pre->date, &(*head), &(*tail));
+					}
+					pre = pre->next;
+				}
+				printf("%d ", (*head)->Data);
+				ALGgraph_out(&(*head), &(*tail));
+
+			}
+		}
+		else {
+			while (*head) {
+				time = 1;
+				pc = *head;//取出头顶点
+				//再顶点数组中找到它的位置
+				for (int j = 0; j < g->vexnum; j++) {
+					if (g->ArrVernode[j].vex == pc->Data) {
+						pos = j;
+						break;
+					}
+				}
+				//pre就是该顶点后面的链表节点
+				pre = g->ArrVernode[pos].fistedge;
+				//入队操作
+				while (pre) {
+					if (access(arr, pre->date)) {
+						arr->Narr[arr->size++] = pre->date;
+						ALGgraph_push(pre->date, &(*head), &(*tail));
+					}
+					pre = pre->next;
+				}
+				//一个顶点操作完成之后，出队
+				printf("%d ", (*head)->Data);
+				ALGgraph_out(&(*head), &(*tail));
+			}
+		}
+		if (time == 1) {
+			for (int k = 0; k < g->vexnum; k++) {
+				if (g->ArrVernode[k].fistedge&&access(arr, g->ArrVernode[k].vex)) {
+					arr->Narr[arr->size++] = g->ArrVernode[k].vex;
+					ALGgraph_push(g->ArrVernode[k].vex, &(*head), &(*tail));
+				}
+			}
+		}
+	}
+}
+//图的广度优先算法2
+void BFS_optimize_Graph(Algraph* g, Node_arr* arr, ALGqueue**head, ALGqueue**tail) {
+	int pos, flag = 0, k = 0;
+	int i = 0;
+	struct ALGqueue* pc;
+	struct Node* pre;
+	//记录有多少个孤立的顶点
+	for (int i = 0; i < g->vexnum; i++) {
+		if (g->ArrVernode[i].fistedge == NULL) {
+			flag++;
+		}
+	}
+	while (k < (g->vexnum - flag)) {
+		pc = (*head);
+		if (pc) {
+			//定位
+			while (*head) {
+				pc = (*head);
+				for (int j = 0; j < g->vexnum; j++) {
+					if (pc->Data == g->ArrVernode[j].vex) {
+						pos = j;
+						break;
+					}
+				}
+				pre = g->ArrVernode[pos].fistedge;
+				while (pre) {
+					if (access(arr, pre->date)) {
+						k++;
+						arr->Narr[arr->size++] = pre->date;
+						ALGgraph_push(pre->date, &(*head), &(*tail));
+					}
+					pre = pre->next;
+				}
+				//出队
+				printf("%d ", (*head)->Data);
+				ALGgraph_out(&(*head), &(*tail));
+			}
+		}
+		if (g->ArrVernode[i].fistedge&&access(arr, g->ArrVernode[i].vex)) {
+			//数组首元素入队和访问
+			k++;
+			arr->Narr[arr->size++] = g->ArrVernode[i].vex;
+			ALGgraph_push(g->ArrVernode[i].vex, &(*head), &(*tail));
+		}
+		i++;
+	}
+	for (int i = 0; i < g->vexnum; i++) {
+		if (g->ArrVernode[i].fistedge == NULL) {
+			arr->Narr[arr->size++] = g->ArrVernode[i].vex;
+			ALGgraph_push(g->ArrVernode[i].vex, &(*head), &(*tail));
+			printf("%d ", g->ArrVernode[i].vex);
+			ALGgraph_out(&(*head), &(*tail));
+		}
+	}
+}
+//图的深度优先算法,先不考虑孤立顶点的算法
+int index_Vnode(Algraph*g, Newtype ver) {
+	for (int i = 0; i < g->vexnum; i++) {
+		if (g->ArrVernode[i].vex == ver) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+//找到栈顶定点在数组中的位置
+int Stack_top_number(Stackarr* SA, Algraph* g) {
+	for (int i = 0; i < g->vexnum; i++) {
+		if (g->ArrVernode[i].vex == SA->arr[SA->top - 1].date) {
+			return i;
+		}
+	}
+}
+int access_pop_ornot(Algraph* g, int index,Node_arr* arr) {
+	struct Node* pc;
+	pc = g->ArrVernode[index].fistedge;
+	//如果都访问过了
+	while (pc) {
+		if (access(arr, pc->date)) {//如果有没访问的
+			break;
+		}
+		pc = pc->next;
+	}
+	if (!pc) {//如果是NULL，则返回-1
+		return -1;
+	}
+	else {
+		for (int i = 0; i < g->vexnum; i++) {
+			if (g->ArrVernode[i].vex == pc->date) {
+				return i;//返回在其中的位置
+			}
+		}
+	}
+}
+void DFS_Graph(Algraph* g, Node_arr *arr, Stackarr *SA) {
+	//先将arr访问数组置为零
+	Zero_arr(arr);
+
+	Newtype ver;//开始访问的顶点
+	int index, flag = 0;
+	printf("please input ver to search:");
+	scanf_s("%d", &ver);
+	struct Node* pc;//数组头顶点的指针
+	index = index_Vnode(g, ver);
+	if (index == -1) {
+		printf("error!,it's can't find it");
+		return;
+	}
+	while (arr->size < g->vexnum||SA->top!=0) {
+		//先入数组头顶点
+		//判断数组顶点是否被访问过
+		if (access(arr, g->ArrVernode[index].vex)) {
+			printf("%d ", g->ArrVernode[index].vex);
+			Stack_push(g->ArrVernode[index].vex, SA);
+			arr->Narr[arr->size++] = g->ArrVernode[index].vex;
+		}
+		pc = g->ArrVernode[index].fistedge;
+		while (pc) {
+			if (access(arr, pc->date)) {//未被访问过的话
+				arr->Narr[arr->size++] = pc->date;
+				printf("%d ", pc->date);
+				Stack_push(pc->date, SA);
+				flag = 1;
+			}
+			//未访问过的数据，定位到数组的位置
+			if (flag == 1) {
+				index = index_Vnode(g, pc->date);
+				pc = g->ArrVernode[index].fistedge;
+				flag = 0;
+			}
+			else {
+				pc = pc->next;
+			}
+		}//此时pc为空
+		//验证栈顶是否还有未被访问的函数
+		index = Stack_top_number(SA, g);//将栈顶顶点搜索到数组中的位置
+		int x = access_pop_ornot(g, index,arr);//如果全部访问完，则x=-1，如果没有则返回位置
+		if (x==-1) {//如果全部满了就出栈
+			Stack_pop(SA);//出栈
+			index = Stack_top_number(SA, g);//再搜索到栈顶在数组中的位置
+		}
+		else {//如果没有全部访问玩，找到该顶点在数组中的位置
+			index = x;//放在index
+		}
+	}
+}
+int main() {
+	Algraph g;
+
+	//定义队头和队尾
+	struct ALGqueue* head, *tail;
+	head = tail = NULL;
+
+	//定义一个可访问数组
+	struct Node_arr arr;
+	Node_arr_init(&arr);//建立数组
+
+	//定义一个栈用于储存数组
+	Stackarr SA;
+	Stackarr_init(&SA);
+
+	creat_Graph(&g);
+	print_Graph(&g);
+	//BFS_Graph(&g,&arr,&head,&tail);//广度优先算法
+	printf("广度优先：");
+	BFS_optimize_Graph(&g, &arr, &head, &tail);//广度优先优化算法
+	printf("\n");
+	printf("深度优先：\n");
+	DFS_Graph(&g,&arr,&SA);//深度优先算法
+	return 0;
+}
+//2 3 1 3 4 2 0 3 4 3 1 2 2 0 2 2 1
+//2 2 1 3 4 3 0 3 6 5 0 2 7 1 2 7 1 2 6 2 2 5 2 2 4 3

@@ -1,0 +1,138 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define Newtype int
+#define Maxsize 12
+//定义结构体出来
+struct Lnode {
+	Newtype date;
+	struct Lnode* next;
+};
+struct Hashtable {
+	Lnode* list;//节点数组
+	int count;//总个数
+};
+void Hash_Init(struct Hashtable* h) {
+	h->list = (Lnode*)malloc(sizeof(Lnode)*Maxsize);
+	if (!h->list) {
+		printf("hashmap was not success!\n");
+		return;
+	}
+	for (int i = 0; i < Maxsize; i++) {
+		h->list[i].next = NULL;
+	}//全部指向空指针
+	h->count = 0;
+	printf("hashmap successfully set up!\n");
+}//初始化建立哈哈希表
+int Hash_function(Newtype date) {
+	return date % Maxsize;
+}//哈希函数
+int hash_find(struct Hashtable* h, int key) {
+	if (!h->list[key].next) {
+		return 1;
+	}
+	return 0;
+}
+int hash_find_element(struct Hashtable*h, Newtype date, int key) {
+	struct Lnode*pc = h->list[key].next;
+	while (pc) {
+		if (pc->date == date) {
+			return 1;
+		}
+		pc = pc->next;
+	}
+	return 0;
+}
+void Hash_insert(struct Hashtable*h, Newtype date, int key) {
+	//看是否有元素在索引的位置
+	int item = key;
+	if (hash_find_element(h, date, key)) {
+		printf("the date is in Hashmap!\n");
+		return;
+	}
+	struct Lnode* newdate = (Lnode*)malloc(sizeof(Lnode));
+	newdate->date = date;
+	newdate->next = NULL;
+	if (hash_find(h, item)) {//如果那个位置没有元素
+		h->list[key].next = newdate;
+	}
+	else {
+		newdate->next = h->list[key].next;
+		h->list[key].next = newdate;
+		printf("The position of inserting is conflict.The position of address is %p\n", newdate);
+	}
+	h->count++;
+}//插入哈希链表
+void Hash_del(struct Hashtable* h, int value) {
+	int key = Hash_function(value);
+	struct Lnode* pre, *pc;
+	pre = &(h->list[key]);
+	pc = pre->next;
+	while (pc) {
+		if (pc->date == value) {
+			//删除操作
+			pre->next = pc->next;
+			free(pc);
+			h->count--;
+			printf("Deletion is succeed!\n");
+			break;
+		}
+		pre = pc;
+		pc = pc->next;
+	}
+	
+}//删除哈希链表
+void Hash_print(struct Hashtable* h) {
+	for (int i = 0; i < Maxsize; i++) {
+		printf("%d: ", i);
+		struct Lnode*pc = (h->list[i].next);
+		while (pc) {
+			printf("%d ", pc->date);
+			pc = pc->next;
+		}printf("\n");
+	}
+}//打印哈希链表
+void Hash_search(struct Hashtable* h, int value) {
+	int key = Hash_function(value);
+	struct Lnode* pc = h->list[key].next;
+	while (pc) {
+		if (pc->date == value) {
+			printf("the position is %p \n", pc);
+			return;
+		}
+		pc = pc->next;
+	}
+	printf("The value is not in hashtable!\n");
+}//搜索哈希值，返回其地址
+int main() {
+	int number;
+	Newtype key, date;
+	Hashtable H;
+	Hash_Init(&H);
+	printf("please input the number:");
+	scanf_s("%d", &number);
+	for (int i = 0; i < number; i++) {
+		printf("please input the date:");
+		scanf_s("%d", &date);
+		key = Hash_function(date);
+		Hash_insert(&H, date, key);
+	}
+	printf("\n");
+	//打印操作
+	Hash_print(&H);
+
+	//插入操作！
+	Hash_insert(&H, 62,Hash_function(62));
+	Hash_insert(&H, 38, Hash_function(38));
+
+	//删除操作
+	Hash_del(&H, 12);
+	Hash_del(&H, 19);
+	
+	//查找操作
+	Hash_search(&H, 62);
+	Hash_search(&H, 38);
+
+	//打印操作
+	Hash_print(&H);
+}
+//12 13 14 62 77 53 44 17 62 53 65 22

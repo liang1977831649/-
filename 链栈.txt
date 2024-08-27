@@ -1,0 +1,146 @@
+==================================main==========================
+#include <stdio.h>
+#include <stdlib.h>
+#include"Function calls.h"
+void meun(){
+	printf("-----------------------请做出选择------------------------\n");
+	printf("1.压栈\n");
+	printf("2.出栈\n");
+	printf("3.打印栈\n");
+	printf("4.销毁栈\n");
+	printf("5.栈是否为空\n");
+	printf("6.退出程序!\n");
+	printf("---------------------------------------------------------\n");
+	printf("您的选择是：");
+}
+struct stackLS* pa;
+int main() {
+	pa=StackInit(pa);
+	int input;
+	while (true) {
+		meun();
+		scanf_s("%d", &input);
+		switch (input)
+		{
+		case 1:
+			pa = StackPush(pa);
+			break;
+		case 2:
+			pa = StackPop(pa);
+			break;
+		case 3:
+			pa = StackPrint(pa);
+			break;
+		case 4:
+			pa = StackDestory(pa);
+			break;
+		case 5:
+			StackEmpty(pa);
+			break;
+		case 6:
+			exit(-1);
+			break;
+		}
+	}
+	return 0;
+}
+================================interface================================
+#include<stdio.h>
+#include<stdlib.h>
+#include "Function calls.h"
+
+struct stackLS* StackInit(stackLS* s) {
+
+	//申请空间,顶部指针
+	struct stackLS *item;
+	item = (struct stackLS*)malloc(sizeof(struct stackLS));
+	item->p = NULL;
+	printf("链栈创建成功！\n");
+	return item;
+}
+struct stackLS* StackPush(stackLS* s) {
+
+	int x;
+	printf("请输入数据:");
+	scanf_s("%d", &x);
+
+	//创建栈
+	struct stackLS *newstack;//ps为临时指针
+	newstack = (struct stackLS*)malloc(sizeof(struct stackLS));
+	newstack->date = x;
+	newstack->p = NULL;
+
+	//改变指针方向
+	newstack->p = s->p;
+	s->p = newstack;
+	
+	printf("入栈成功！\n");
+	return s;
+}
+struct stackLS* StackPop(stackLS* s) {
+	if (s->p == NULL) {
+		printf("无数据，无法出栈!\n");
+		return s;
+	}
+	struct stackLS *pa;
+	pa = s->p;
+
+	//改变指针
+	s->p = pa->p;
+	free(pa);
+	pa->p = NULL;
+	printf("出栈成功!\n");
+	return s;
+}
+struct stackLS* StackPrint(stackLS* s) {
+	if (s->p == NULL) {
+		printf("无数据，无法输出!\n");
+		return s;
+	}
+	struct stackLS* pc;
+	pc = s->p;
+	while (pc != NULL) {
+		printf("%d ", pc->date);
+		s->p = pc->p;
+		free(pc);
+		pc = s->p;
+	}
+	printf("\n");
+	return s;
+}
+struct stackLS* StackDestory(stackLS* s) {
+	if (s->p == NULL) {
+		printf("无数据，不可销毁!\n");
+		return s;
+	}
+	struct stackLS* pa;
+	pa = s->p;
+	while (pa != NULL) {
+		s->p = pa->p;//让s指向被销毁的栈的下一个栈
+		free(pa);
+		pa = s->p;
+	}
+	printf("销毁成功！\n");
+	return s;
+}
+void StackEmpty(stackLS* s) {
+	if (s->p == NULL) {
+		printf("空链栈！\n");
+		return;
+	}
+	printf("非空链栈！\n");
+}
+=============================Function calls======================================
+#pragma once
+//定义一个数据
+struct stackLS {
+	int date;
+	struct stackLS* p;
+};
+
+struct stackLS* StackInit(stackLS* s);//链栈的创建
+struct stackLS* StackPush(stackLS* s);//链栈入栈
+struct stackLS* StackPop(stackLS* s);//链栈出栈
+struct stackLS* StackPrint(stackLS* s);//链栈打印
+struct stackLS* StackDestory(stackLS* s);//链栈销毁
+void StackEmpty(stackLS* s);//链栈是否为空

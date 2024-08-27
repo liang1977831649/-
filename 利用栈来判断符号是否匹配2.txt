@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+//经典字符串匹配问题
+ 
+//定义结构变量
+struct Node {
+	char *arr;
+	int size;
+	int capacity;
+};
+ 
+void NodeInit(struct Node* head) {
+	head->size = 0;
+	head->capacity = 0;
+	//动态内存分配
+	head->arr = (char*)malloc(4 * sizeof(char));
+	head->capacity += 8;
+	printf("创建成功！\n");
+}
+int Math(struct Node* head,char a) {
+	if ((a == ')'&&head->arr[head->size - 1] == '(') || (a == ']'&&head->arr[head->size - 1] == '[')
+		|| (a == '}'&&head->arr[head->size - 1] == '{')) {
+		return 1;
+	}
+	return 0;
+}
+void Del(struct Node* head) {
+	head->arr[--head->size] = '\0';
+}
+void Add(struct Node* head,char a) {
+	//先判断容量是否充足
+	if (head->size == head->capacity) {//容量不充足
+		int newcapacity = (head->capacity) * 2;
+		head->arr = (char*)realloc( head->arr,newcapacity * sizeof(char));
+		head->capacity = newcapacity;
+	}
+	//添加该括号
+	head->arr[head->size++] = a;
+}
+struct Node head;
+int main() {
+	//定义用户字符串
+	char str[20];
+	printf("print：\n");
+	gets_s(str);
+	int len = strlen(str);
+	for (int i = 0; i < len; i++) {
+		if (str[i] == '(' || str[i] == ')' || str[i] == '[' || str[i] == ']' || str[i] == '{' || str[i] == '}') {
+			if (i == 0) {
+				//定义结构体
+				NodeInit(&head);
+				Add(&head, str[i]);
+			}
+			else {
+				//判断是否匹配
+				if (Math(&head,str[i])) {//若匹配则删除头顶的一个字符串
+					Del(&head);
+				}
+				else {
+					Add(&head,str[i]);//若不匹配则添加
+				}
+			}
+		}
+	}
+	//最后判断长度是否为空
+	if (head.size == 0) {
+		printf("str is mathing!\n");
+	}
+	else {
+		printf("str is not mathing!\n ");
+	}
+	return 0;
+}

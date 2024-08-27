@@ -1,0 +1,212 @@
+----------------------------------main.cpp------------------------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include "newlogo.h"
+//顺序表的实现
+struct Listname pa;
+void meun(){
+	printf("-----------------------请选择操作----------------------\n");
+	printf("1.创建顺序表\n");
+	printf("2.顺序表载入新数据\n");
+	printf("3.顺序表尾插\n");
+	printf("4.顺序表尾删\n");
+	printf("5.顺序表头插\n");
+	printf("6.顺序表头删\n");
+	printf("7.顺序表中间插入\n");
+	printf("8.顺序表中间删除\n");
+	printf("9.顺序表的打印\n");
+	printf("10.退出程序\n");
+	printf("--------------------------------------------------------\n");
+}
+int main(){
+	meun();
+	int n;
+	while (true) {
+		printf("请输入\n");
+		scanf("%d", &n);
+		switch (n) {
+		case 1:
+			ListInit(&pa);
+			break;
+		case 2:
+			ListTailInsert(&pa);
+			break;
+		case 3:
+			ListTailInsert(&pa);
+			break;
+		case 4:
+			ListTaildel(&pa);
+			break;
+		case 5:
+			ListHeadInsert(&pa);
+			break;
+		case 6:
+			ListHeadDel(&pa);
+			break;
+		case 7:
+			ListMiddleInsert(&pa);
+			break;
+		case 8:
+			ListMiddleDel(&pa);
+			break;
+		case 9:
+			print(&pa);
+			break;
+		case 10:
+			break;
+		}
+	}
+	print(&pa);
+	return 0;
+}
+-----------------------------interface.cpp---------------------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include "newlogo.h"
+
+//接口函数的定义
+void ListInit(Listname* pa) {//顺序表的定义
+	pa->a = NULL;
+	pa->capacity = pa->size = 0;
+	printf("成功创建\n");
+}
+int ListCheckcapacity(Listname* pa) {//顺序表检查容量是否充足
+	if (pa->size == pa->capacity) {
+		printf("空间不足，请扩容\n");
+		return 0;
+	}
+	return 1;
+}
+void print(Listname* pa) {//打印顺序表
+	if (pa->a == NULL||pa->size==0) {
+		printf("结构错误或数据个数为0\n"); exit(-1);
+	}
+		printf("所含数据是：\n");
+		for (int i = 0; i < pa->size; i++) {
+			printf("%d ", pa->a[i]);
+		}
+		printf("\n");
+}
+void ListTailInsert(Listname* pa) {//顺序表的尾插
+		int x;
+		printf("您要插入的数是？");
+		scanf("%d", &x);
+		if (pa->size == pa->capacity) {
+			if (pa->capacity == 0) {
+				pa->capacity = 4;
+				pa->a = (int*)malloc(pa->capacity * sizeof(int));
+			}
+			else {
+				Listname* item = (Listname*)realloc(pa->a, 2 * (pa->capacity) * sizeof(int));
+				pa->capacity *= 2;
+			}
+			printf("已扩容\n");
+		}
+		pa->a[pa->size] = x;
+		pa->size++;
+}
+void ListTaildel(Listname* pa) {//顺序表的尾删
+	if (pa->a == NULL) {
+		printf("结构错误\n"); exit(-1);
+	}
+	pa->a[pa->size-1] = 0;
+	pa->size--;
+}
+
+void ListHeadInsert(Listname* pa) {//顺序表头插
+	if (pa->a == NULL) {
+		printf("结构错误\n"); exit(-1);
+	}
+	if (ListCheckcapacity(pa) == 0) {
+		Listname* item = (Listname*)realloc(pa->a, 2 * (pa->capacity) * sizeof(int));
+		pa->capacity *= 2;
+		if (item != NULL) {
+			printf("已扩容\n");
+		}
+	}
+	int x;
+	printf("输入你要头插的数字：");
+	scanf("%d", &x);
+	for (int i = pa->size; i > 0; i--)
+	{
+		pa->a[i] = pa->a[i - 1];
+	}
+	pa->a[0] = x;
+	pa->size++;
+}
+void ListHeadDel(Listname* pa) {//顺序表的头删
+	if (pa->a == NULL) {
+		printf("结构错误"); exit(-1);
+	}
+	for (int i = 0; i < pa->size; i++) {
+		pa->a[i] = pa->a[i + 1];
+	}
+	pa->size--;
+}
+void ListMiddleDel(Listname* pa) {//顺序表删除中间数据
+	if (pa->a == NULL) {
+		printf("结构错误"); exit(-1);
+	}
+	int x,flag=0;
+	printf("请输入你要的的数据");
+	scanf("%d", &x);
+	for (int i = 0; i < pa->size; i++) {
+		if (pa->a[i] == x) {
+			for (int j = i; j < pa->size; j++) {
+				pa->a[j] = pa->a[j + 1];
+			}
+			pa->size--;
+			flag = 0;
+			break;
+		}
+		flag = 1;
+	}
+	if (flag == 1) {
+		printf("无法找到该数据\n");
+	}
+	else {
+		printf("删除成功\n");
+	}
+}
+void ListMiddleInsert(Listname* pa) {//顺序表插入中间数据
+	if (pa->a == NULL) {
+		printf("结构错误"); exit(-1);
+	}
+	if (ListCheckcapacity(pa) == 0) {
+		Listname* item = (Listname*)realloc(pa->a, 2 * (pa->capacity) * sizeof(int));
+		pa->capacity *= 2;
+		if (item != NULL) {
+			printf("已扩容\n");
+		}
+	}
+	int x,index;
+	printf("你要插入的数据以及第几个要插的位置分别是：\n");
+	scanf("%d %d", &x,&index);
+	for (int i = pa->size; i >= index ; i--) {
+		pa->a[i] = pa->a[i-1];
+		
+	}
+	pa->size++;
+	pa->a[index - 1] = x;
+	
+}
+---------------------------------------------newlogo.h-------------------------------------------------
+#pragma once
+
+struct Listname{
+	int* a;
+	int size;
+	int capacity;
+};
+
+//接口函数的调用
+void ListInit(Listname* pa); //顺序表的定义
+void ListTailInsert(Listname* pa);//顺序表尾插
+void ListTaildel(Listname* pa);//顺序表尾删
+void ListHeadInsert(Listname* pa);//顺序表头插
+void ListHeadDel(Listname* pa);//顺序表头删
+void ListMiddleInsert(Listname* pa);//顺序表中间插入
+void ListMiddleDel(Listname* pa);//顺序表中间删除
+void print(Listname* pa); //打印顺序表
+int ListCheckcapacity(Listname* pa);//检查空间是否足够
+-------------------------------------------------------------------------------------------------------------

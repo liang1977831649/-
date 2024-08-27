@@ -1,0 +1,161 @@
+=================================main===========================
+#include <stdio.h>
+#include <stdlib.h>
+#include"Function calls.h"
+queuedate *head;
+queuedate *tail;
+void menu(){
+	printf("--------------------请选择以下操作-----------------------\n");
+	printf("1.尾插数据\n");
+	printf("2.头删数据\n");
+	printf("3.队列的个数\n");
+	printf("4.队列的打印\n");
+	printf("5.销毁队列\n");
+	printf("6.推出程序\n");
+	printf("----------------------------------------------------------\n");
+	printf("您的选择是：\n");
+}
+int main() {
+	int input;
+	QueueInit(&head, &tail);
+	while (true) {
+		menu();
+		scanf_s("%d", &input);
+		switch (input)
+		{
+		case 1:
+			QueueTailInsert(&head, &tail);
+			break;
+		case 2:
+			QueueHeadrDel(&head, &tail);
+			break;
+		case 3:
+			printf("队列的个数是：%d\n", Queueleng(&head, &tail));
+			break;
+		case 4:
+			QueuePrintf(&head, &tail);
+			break;
+		case 5:
+			QueueDestory(&head, &tail);
+			break;
+		case 6:
+			exit(-1);
+			break;
+		}
+	}
+	return 0;
+}
+============================interface==================================
+#include"Function calls.h"
+#include<stdio.h>
+#include<stdlib.h>
+//函数的定义
+void QueueInit(queuedate** head, queuedate** tail) {
+	*head = NULL;
+	*tail = NULL;
+	printf("指针已初始化!\n");
+}
+void QueueTailInsert(queuedate** head,queuedate** tail) {
+	int x;
+	printf("请输入数据：\n");
+	scanf_s("%d", &x);
+
+	//新建结构
+	struct queuedate* newdate = (struct queuedate*)malloc(sizeof(struct queuedate));
+	newdate->date = x;
+	newdate->next = NULL;
+
+	//如果是第一次创建
+	if (*head == NULL) {
+		*head = newdate;
+		*tail = newdate;
+	}
+	else//如果不是第一次 
+	{
+		struct queuedate* pre = *tail;
+		pre->next = newdate;
+		*tail = newdate;
+	}
+}
+void QueueHeadrDel(queuedate** head, queuedate** tail)
+{	
+	if (*head == NULL) {
+		printf("无数据，不可删除!\n");
+		return;
+	}
+	struct queuedate* item = *head;
+	*head = item->next;
+	if (item->next != NULL) {
+		free(item);
+		item->next = NULL;
+	}
+	else {
+		free(item);
+		item->next = NULL;
+		*tail = NULL;
+	}
+	printf("头删成功！\n");
+}
+void QueuePrintf(queuedate** head, queuedate** tail) {
+	if (*head == NULL) {
+		printf("无数据，不可打印！\n");
+		return;
+	}
+	struct queuedate *pre, *pc;
+	pre = *head;
+	pc = pre;
+
+	while (pre!=NULL) {
+		pc = pc->next;
+		printf("%d ", pre->date);
+		free(pre);
+		pre = pc;
+	}
+	printf("\n");
+	*head = NULL;
+	*tail = NULL;
+}
+int Queueleng(queuedate** head, queuedate** tail) {
+	if (*head == NULL) {
+		return 0;
+	}
+	struct queuedate* pc = *head;
+	int count = 0;
+	while (pc != NULL) {
+		count++;
+		pc = pc->next;
+	}
+	return count;
+}
+void QueueDestory(queuedate** head, queuedate** tail) {
+	if (*head == NULL) {
+		printf("无数据，不可销毁\n");
+		return;
+	}
+	struct queuedate *pre, *pc;
+	pre = *head;
+	pc = *head;
+	while (pc != NULL) {
+		pc = pc->next;
+		free(pre);
+		pre = pc;
+	}
+	*head = NULL;
+	*tail = NULL;
+	printf("销毁成功！\n");
+}
+===========================Function calls===================================
+#pragma once
+//定义一个结构类型
+struct queuedate {
+	int date;
+	struct queuedate* next;
+};
+//队列指针，一个指向头，一个指向尾
+//函数声明
+void QueueInit(queuedate** head,queuedate** tail);//指针的初始化
+void QueueTailInsert(queuedate** head, queuedate** tail);//尾插数据
+void QueueHeadrDel(queuedate** head, queuedate** tail);//头删数据
+int Queueleng(queuedate** head, queuedate** tail);//队列的个数
+void QueuePrintf(queuedate** head, queuedate** tail);//队列的打印
+void QueueDestory(queuedate** head, queuedate** tail);//销毁
